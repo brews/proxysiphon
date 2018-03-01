@@ -12,7 +12,7 @@ setup(
     url='https://github.com/brews/proxysiphon',
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 1 - Planning',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -31,7 +31,7 @@ setup(
     packages=find_packages(exclude=['docs']),
 
     install_requires=['numpy', 'scipy', 'matplotlib', 'pandas', 'cartopy', 'attrs',
-                      'carbonferret', 'snakebacon', 'erebus'],
+                      'carbonferret', 'snakebacon', 'erebusfall'],
     tests_require=['pytest'],
     package_data={'proxysiphon': ['tests/*.txt']},
 )
