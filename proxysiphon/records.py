@@ -1,7 +1,7 @@
 import datetime
 from chardet import detect as chdetect
 
-import proxysetup.proxychimp as proxychimp
+import proxysiphon.proxychimp as proxychimp
 
 
 def read_ncdc(filepath_or_buffer, encoding=None):

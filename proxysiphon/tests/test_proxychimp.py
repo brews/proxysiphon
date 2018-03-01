@@ -2,7 +2,7 @@ from tempfile import NamedTemporaryFile
 import pytest
 import pandas as pd
 
-from .. import proxychimp
+from proxysiphon import proxychimp
 
 
 datapayload = ['#------------------------',

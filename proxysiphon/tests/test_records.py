@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 
-from proxysetup import records, proxychimp
+from proxysiphon import records, proxychimp
 
 
 @pytest.fixture(scope='module')

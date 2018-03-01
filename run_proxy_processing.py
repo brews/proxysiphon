@@ -28,7 +28,7 @@ import yaml
 import numpy as np
 import pandas as pd
 
-from proxysetup import read_ncdc, get_deltar_online, fit_agedepthmodel, date_proxy, qcreport
+from proxysiphon import read_ncdc, get_deltar_online, fit_agedepthmodel, date_proxy, qcreport
 
 
 log = logging.getLogger(__name__)
