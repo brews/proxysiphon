@@ -129,6 +129,12 @@ def test_ContributionDate():
     assert v.date.month == 3
     assert v.date.day == 31
 
+def test_Description():
+    testlines = """# Description and Notes
+                #        Description: d18O sacc from 2003 paper, mg/ca sacc from 2002 paper, alkeno"""
+    v = records.Description(testlines)
+    assert v.description == 'd18O sacc from 2003 paper, mg/ca sacc from 2002 paper, alkeno'
+
 
 def test_NcdcRecord_chron_data(testchrondatalines):
     v = records.NcdcRecord(testchrondatalines)

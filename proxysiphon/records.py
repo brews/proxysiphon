@@ -130,6 +130,19 @@ class ContributionDate:
             pass
 
 
+class Description:
+    def __init__(self, s):
+        self.description = None
+
+        s = str(s)
+        s = s.splitlines()
+        try:
+            self.description = find_values(s, 'Description:', fun=str)
+        except AttributeError:
+            # Description information  not found, should be None.
+            pass
+
+
 class NcdcRecord:
     def __init__(self, s):
         g = proxychimp.Guts(s)
@@ -142,6 +155,7 @@ class NcdcRecord:
             return out
 
         self.contribution_date = ContributionDate(stringer(g, 'Contribution_Date'))
+        self.description = Description(stringer(g, 'Description_and_Notes'))
         self.publication = Publication(stringer(g, 'Publication'))
         self.site_information = SiteInformation(stringer(g, 'Site Information'))
         self.chronology_information = ChronologyInformation([stringer(g, 'Chronology_Information'), g.yank_chron_df()])
