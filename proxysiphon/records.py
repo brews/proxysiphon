@@ -143,6 +143,18 @@ class Description:
             pass
 
 
+class SourceUrl:
+    def __init__(self, s):
+        self.original_source_url = None
+
+        s = str(s)
+        s = s.splitlines()
+        try:
+            self.original_source_url = find_values(s, 'Original_Source_URL:', fun=str)
+        except AttributeError:
+            # Source URL information  not found, should be None.
+            pass
+
 class NcdcRecord:
     def __init__(self, s):
         g = proxychimp.Guts(s)
@@ -154,6 +166,7 @@ class NcdcRecord:
                 out = None
             return out
 
+        self.original_source_url = SourceUrl(stringer(g, 'NOTE: Please cite original publication, online resource and date accessed when using this data.'))
         self.contribution_date = ContributionDate(stringer(g, 'Contribution_Date'))
         self.description = Description(stringer(g, 'Description_and_Notes'))
         self.publication = Publication(stringer(g, 'Publication'))
