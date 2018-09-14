@@ -1,4 +1,5 @@
 import logging
+import collections
 import datetime
 from io import BytesIO
 
@@ -21,7 +22,7 @@ log = logging.getLogger(__name__)
 
 def grab_latlon(g):
     """Grab latitude from proxychimp.Guts"""
-    victim = g.pull_section('Site Information')
+    victim = g.pull_section('Site Information')[0]
     fields = dict(Northernmost_Latitude=None,
                   Southernmost_Latitude=None,
                   Easternmost_Longitude=None,
@@ -37,7 +38,7 @@ def grab_latlon(g):
 
 def grab_elevation(g):
     """Grab site elevation from proxychimp.Guts"""
-    victim = g.pull_section('Site Information')
+    victim = g.pull_section('Site Information')[0]
     elevation = None
     for ln in victim:
         if 'Elevation:' in ln:
@@ -47,7 +48,7 @@ def grab_elevation(g):
 
 def grab_collection_year(g):
     """Get collection year from Data_Collection section of proxychimp.Guts"""
-    victim = g.pull_section('Data_Collection')
+    victim = g.pull_section('Data_Collection')[0]
     yr = None
     for ln in victim:
         if 'Collection_Year' in ln:
@@ -58,16 +59,17 @@ def grab_collection_year(g):
 def grab_publication_year(g):
     """Get publication year from proxychimp.Guts"""
     victim = g.pull_section('Publication')
-    yr = None
-    for ln in victim:
-        if 'Published_Date_or_Year' in ln:
-            ln_split = ln.split(':')
-            yr = int(ln_split[-1])
+    yr = []
+    for p in victim:
+        for ln in p:
+            if 'Published_Date_or_Year' in ln:
+                ln_split = ln.split(':')
+                yr.append(int(ln_split[-1]))
     return yr
 
 def grab_contribution_date(g):
     """Get contribution date from proxychimp.Guts"""
-    victim = g.pull_section('Contribution_Date')
+    victim = g.pull_section('Contribution_Date')[0]
     d = None
     for ln in victim:
         if 'Date' in ln:
@@ -139,22 +141,34 @@ class Guts:
         """Populate the section index"""
         all_keys = []
         all_start = []
+        all_stop = []
         prev_divider = False
+
         for idx, ln in enumerate(self.description):  # Lines after 6-line title.
             if prev_divider is True and any([h == ln.rstrip() for h in self._section_headings]):
                 key = ln[1:].rstrip().lstrip()
+
+                # If already have start idx for other section, append end idx
+                # for that section
+                if len(all_start) > 0:
+                    all_stop.append(idx - 1)
+
                 all_keys.append(key)
                 all_start.append(idx)
                 prev_divider = False
             if DIVIDER in ln:
                 prev_divider = True
-        all_stop = [x - 1 for x in all_start[1:]]
         all_stop.append(self.data_beginline)
-        self.sectionindex = {k: (v0, v1) for (k, v0, v1) in zip(all_keys, all_start, all_stop)}
+
+        section_map = collections.defaultdict(list)
+        for (k, start, stop) in zip(all_keys, all_start, all_stop):
+            section_map[k].append((start, stop))
+        section_map.default_factory = None
+        self.sectionindex = section_map
 
     def pull_section(self, section):
-        """Grab a list of line strings from the file description"""
-        return self.description[slice(*self.sectionindex[section])]
+        """Grab a list of list of line strings from the file description for each 'section'"""
+        return [self.description[slice(*idx)] for idx in self.sectionindex[section]]
 
     def available_sections(self):
         """Get a list of available sections in the file"""
@@ -173,7 +187,7 @@ class Guts:
         """Get chronology information as dataframe"""
         if missingvalues is None:
             missingvalues = [-999, 'NaN']
-        section = self.pull_section(section_name)
+        section = self.pull_section(section_name)[0]
         start_idx = section.index(CHRON_HEADER)
         g_chrond = section[start_idx:]
         g_chrond_cleaned = [x[2:].rstrip() for x in g_chrond]  # Removes the '# ' and ending white space.
@@ -183,7 +197,7 @@ class Guts:
 
     def guess_missingvalues(self):
         """Guess data section missing values"""
-        section = self.pull_section('Data')
+        section = self.pull_section('Data')[0]
         out = None
         for ln in section:
             if MISSINGVALUE_LABEL in ln:

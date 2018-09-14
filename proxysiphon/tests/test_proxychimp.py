@@ -115,10 +115,10 @@ def test__divide_portions(dumb_guts):
 
 
 def test__write_sectionindex(dumb_guts):
-    goal_index = {'Chronology_Information': (7, 11),
-                  'Contribution_Date': (1, 3),
-                  'Data': (12, 15),
-                  'Title': (4, 6)}
+    goal_index = {'Chronology_Information': [(7, 11)],
+                  'Contribution_Date': [(1, 3)],
+                  'Data': [(12, 15)],
+                  'Title': [(4, 6)]}
     assert len(dumb_guts.sectionindex.keys()) == 4
     for k, goal in goal_index.items():
         assert dumb_guts.sectionindex[k] == goal
@@ -126,7 +126,7 @@ def test__write_sectionindex(dumb_guts):
 
 def test_pull_section(dumb_guts):
     goal = ['# Data', '# Data lines follow (have no #)', '# Missing Value: -999']
-    assert dumb_guts.pull_section('Data') == goal
+    assert dumb_guts.pull_section('Data')[0] == goal
 
 
 def test_pull_section_badname(dumb_guts):

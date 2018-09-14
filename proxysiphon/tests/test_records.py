@@ -88,7 +88,7 @@ def test_ChronologyInformation(testchrondatalines):
                  'other_type': [pd.np.nan]}
     goal = pd.DataFrame(goal_dict)
     g = proxychimp.Guts(testchrondatalines)
-    df = records.ChronologyInformation(['\n'.join(g.pull_section('Data')), g.yank_chron_df()]).df
+    df = records.ChronologyInformation(['\n'.join(g.pull_section('Data')[0]), g.yank_chron_df()]).df
     for k in goal_dict.keys():
         pd.testing.assert_series_equal(goal[k], df[k])
 
@@ -97,7 +97,7 @@ def test_Data(testchrondatalines):
     goal_dict = {'depth': [1, 4], 'age': [2, 5], 'bacon': [3, 6]}
     goal = pd.DataFrame(goal_dict)
     g = proxychimp.Guts(testchrondatalines)
-    df = records.Data(['\n'.join(g.pull_section('Data')), g.yank_data_df()]).df
+    df = records.Data(['\n'.join(g.pull_section('Data')[0]), g.yank_data_df()]).df
     for k in goal_dict.keys():
         pd.testing.assert_series_equal(goal[k], df[k])
 

@@ -112,7 +112,20 @@ class Publication:
 
         s = str(s)
         s = s.splitlines()
+        self.authors = find_values(s, '# Authors:', fun=str)
+        self.published_date_or_year = find_values(s, '# Published_Date_or_Year:',
+                                                  fun=int)
+        self.published_title = find_values(s, '# Published_Title:', fun=str)
+        self.journal_name = find_values(s, '# Journal_Name:', fun=str)
+        self.volume = find_values(s, '# Volume:', fun=str)
+        self.edition = find_values(s, '# Edition:', fun=str)
+        self.issue = find_values(s, '# Issue:', fun=str)
+        self.pages = find_values(s, '# Pages:', fun=str)
+        self.report_number = find_values(s, '# Report Number:', fun=str)
         self.doi = find_values(s, '# DOI:', fun=str)
+        self.online_resource = find_values(s, '# Online_Resource:', fun=str)
+        self.full_citation = find_values(s, '# Full_Citation:', fun=str)
+        self.abstract = find_values(s, '# Abstract:', fun=str)
 
 
 class ContributionDate:
@@ -160,18 +173,25 @@ class NcdcRecord:
     def __init__(self, s):
         g = proxychimp.Guts(s)
 
-        def stringer(guts, sec):
+        def stringer(guts, sec, cls=None):
+            out = []
             try:
-                out = '\n'.join(guts.pull_section(sec))
+                secs = guts.pull_section(sec)
+                for sec in secs:
+                    if cls is not None:
+                        this_data = cls('\n'.join(sec))
+                    else:
+                        this_data = '\n'.join(sec)
+                    out.append(this_data)
             except KeyError:
-                out = None
+                out.append(None)
             return out
 
-        self.original_source_url = SourceUrl(stringer(g, 'NOTE: Please cite original publication, online resource and date accessed when using this data.'))
-        self.contribution_date = ContributionDate(stringer(g, 'Contribution_Date'))
-        self.description = Description(stringer(g, 'Description_and_Notes'))
-        self.publication = Publication(stringer(g, 'Publication'))
-        self.site_information = SiteInformation(stringer(g, 'Site Information'))
-        self.chronology_information = ChronologyInformation([stringer(g, 'Chronology_Information'), g.yank_chron_df()])
-        self.data = Data([stringer(g, 'Data'), g.yank_data_df()])
-        self.data_collection = DataCollection(stringer(g, 'Data_Collection'))
+        self.original_source_url = stringer(g, 'NOTE: Please cite original publication, online resource and date accessed when using this data.', SourceUrl)
+        self.contribution_date = ContributionDate(stringer(g, 'Contribution_Date')[0])
+        self.description = Description(stringer(g, 'Description_and_Notes')[0])
+        self.publication = stringer(g, 'Publication', Publication)
+        self.site_information = SiteInformation(stringer(g, 'Site Information')[0])
+        self.chronology_information = ChronologyInformation([stringer(g, 'Chronology_Information')[0], g.yank_chron_df()])
+        self.data = Data([stringer(g, 'Data')[0], g.yank_data_df()])
+        self.data_collection = DataCollection(stringer(g, 'Data_Collection')[0])
