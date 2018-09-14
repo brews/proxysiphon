@@ -155,6 +155,7 @@ class SourceUrl:
             # Source URL information  not found, should be None.
             pass
 
+
 class NcdcRecord:
     def __init__(self, s):
         g = proxychimp.Guts(s)
