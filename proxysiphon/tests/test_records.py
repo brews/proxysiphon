@@ -103,7 +103,7 @@ def test_Data(testchrondatalines):
 
 
 def test_Publication():
-    testlines = """# Publication
+    testlines1 = """# Publication
                 # Authors: Tierney, Jessica E.; Pausata, Francesco S. R.; deMenocal, Peter B.
                 # Published_Date_or_Year: 2016
                 # Published_Title: Deglacial Indian monsoon failure and North Atlantic stadials linked by Indian Ocean surface cooling
@@ -117,8 +117,10 @@ def test_Publication():
                 # Online_Resource: 
                 # Full_Citation: 
                 # Abstract: """
-    v = records.Publication(testlines)
-    assert v.doi == '10.1038/ngeo2603'
+
+    v1 = records.Publication(testlines1)
+    assert v1.authors == 'Tierney, Jessica E.; Pausata, Francesco S. R.; deMenocal, Peter B.'
+    assert v1.doi == '10.1038/ngeo2603'
 
 
 def test_ContributionDate():
