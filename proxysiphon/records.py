@@ -128,68 +128,84 @@ class Publication:
         self.abstract = find_values(s, '# Abstract:', fun=str)
 
 
-class ContributionDate:
-    def __init__(self, s):
-        self.date = None
+def fetch_description(s):
+    """Grab 'Description' string from section string `s`
+    """
+    s = str(s)
+    s = s.splitlines()
 
-        s = str(s)
-        s = s.splitlines()
-        try:
-            v = find_values(s, 'Date:', fun=str).split('-')
-            assert len(v) == 3
-            self.date = datetime.date(year=int(v[0]), month=int(v[1]), day=int(v[2]))
-        except AttributeError:
-            # Date information not found, as v is None, as is self.date
-            pass
+    out = None
 
-
-class Description:
-    def __init__(self, s):
-        self.description = None
-
-        s = str(s)
-        s = s.splitlines()
-        try:
-            self.description = find_values(s, 'Description:', fun=str)
-        except AttributeError:
-            # Description information  not found, should be None.
-            pass
+    try:
+        out = find_values(s, 'Description:', fun=str)
+    except AttributeError:
+        # Description information  not found, should be None.
+        pass
+    return out
 
 
-class SourceUrl:
-    def __init__(self, s):
-        self.original_source_url = None
+def fetch_sourceurl(s):
+    """Grab 'Original_Source_URL' string from section string `s`
+    """
+    s = str(s)
+    s = s.splitlines()
 
-        s = str(s)
-        s = s.splitlines()
-        try:
-            self.original_source_url = find_values(s, 'Original_Source_URL:', fun=str)
-        except AttributeError:
-            # Source URL information  not found, should be None.
-            pass
+    out = None
+
+    try:
+        out = find_values(s, 'Original_Source_URL:', fun=str)
+    except AttributeError:
+        # Source URL information not found, should be None.
+        pass
+    return out
 
 
 class NcdcRecord:
+    """
+
+    Attributes
+    ----------
+    original_source_url : sequence
+        Sequence of strings giving URLs for data source.
+    description : str or None
+        String with additional description and notes.
+    publication : sequence of Publication
+        Publications citing proxy material. Empty sequence if no publications
+        given.
+    site_information : SiteInformation
+        Information on proxy site.
+    chronology_information : ChronologyInformation
+        Time-constraints on proxy.
+    data : Data
+        Actual proxy data for site.
+    data_collection : DataCollection
+        Notes and additional information on collection name and when the data
+        was collected.
+    """
     def __init__(self, s):
+        """
+
+        Parameters
+        ----------
+        s : str
+            String from NOAA NCDC file.
+        """
         g = proxychimp.Guts(s)
 
         def stringer(guts, sec, cls=None):
+            # Should prob move this func outside of the class constructor.
             out = []
-            try:
-                secs = guts.pull_section(sec)
-                for sec in secs:
-                    if cls is not None:
-                        this_data = cls('\n'.join(sec))
-                    else:
-                        this_data = '\n'.join(sec)
-                    out.append(this_data)
-            except KeyError:
-                out.append(None)
+            secs = guts.pull_section(sec)
+            for sec in secs:
+                if cls is not None:
+                    this_data = cls('\n'.join(sec))
+                else:
+                    this_data = '\n'.join(sec)
+                out.append(this_data)
             return out
 
-        self.original_source_url = stringer(g, 'NOTE: Please cite original publication, online resource and date accessed when using this data.', SourceUrl)
-        self.contribution_date = ContributionDate(stringer(g, 'Contribution_Date')[0])
-        self.description = Description(stringer(g, 'Description_and_Notes')[0])
+        self.original_source_url = stringer(g, 'NOTE: Please cite original publication, online resource and date accessed when using this data.', fetch_sourceurl)
+        self.description = stringer(g, 'Description and Notes', fetch_description)[0]
         self.publication = stringer(g, 'Publication', Publication)
         self.site_information = SiteInformation(stringer(g, 'Site Information')[0])
         self.chronology_information = ChronologyInformation([stringer(g, 'Chronology_Information')[0], g.yank_chron_df()])

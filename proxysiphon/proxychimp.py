@@ -9,7 +9,8 @@ from chardet import detect as chdetect
 
 DIVIDER = '#------------------------'
 DATALINE_TRIGGER = '# Data lines follow (have no #)'
-HEADINGS = ['Contribution_Date', 'Title', 'Investigators', 
+HEADINGS = ['Contribution_Date', 'Title', 'Investigators',
+            'NOTE: Please cite original publication, online resource and date accessed when using this data.',
             'Description and Notes', 'Publication', 'Funding_Agency', 
             'Site Information', 'Data_Collection', 'Species', 
             'Chronology_Information', 'Variables', 'Data']
@@ -168,7 +169,11 @@ class Guts:
 
     def pull_section(self, section):
         """Grab a list of list of line strings from the file description for each 'section'"""
-        return [self.description[slice(*idx)] for idx in self.sectionindex[section]]
+        try:
+            out = [self.description[slice(*idx)] for idx in self.sectionindex[section]]
+        except KeyError:
+            raise KeyError('section key "{}" not found'.format(section))
+        return out
 
     def available_sections(self):
         """Get a list of available sections in the file"""

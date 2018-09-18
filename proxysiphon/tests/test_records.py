@@ -7,6 +7,22 @@ from proxysiphon import records, proxychimp
 @pytest.fixture(scope='module')
 def testchrondatalines():
     lines = ['#------------------------',
+               '# NOTE: Please cite original publication, online resource and date accessed when using this data.',
+               '# If there is no publication information, please cite Investigator, title, online resource and date accessed.',
+               '#',
+               '#------------------------',
+               '# Description and Notes',
+               '#',
+               '#------------------------',
+               '# Site Information',
+               '#',
+               '#------------------------',
+               '# Data_Collection',
+               '#',
+               '#------------------------',
+               '# Publication',
+               '#',
+               '#------------------------',
                '# Contribution_Date',
                '#',
                '#------------------------',
@@ -123,23 +139,14 @@ def test_Publication():
     assert v1.doi == '10.1038/ngeo2603'
 
 
-def test_ContributionDate():
-    testlines = """# Contribution_Date
-                #    Date: 2017-03-31"""
-    v = records.ContributionDate(testlines)
-    assert v.date.year == 2017
-    assert v.date.month == 3
-    assert v.date.day == 31
-
-
-def test_Description():
+def test_fetch_description():
     testlines = """# Description and Notes
                 #        Description: d18O sacc from 2003 paper, mg/ca sacc from 2002 paper, alkeno"""
-    v = records.Description(testlines)
-    assert v.description == 'd18O sacc from 2003 paper, mg/ca sacc from 2002 paper, alkeno'
+    v = records.fetch_description(testlines)
+    assert v == 'd18O sacc from 2003 paper, mg/ca sacc from 2002 paper, alkeno'
 
 
-def test_SourceUrl():
+def test_fetch_sourceurl():
     testlines = """# NOTE: Please cite original publication, online resource and date accessed when using this data.
                 # If there is no publication information, please cite Investigator,
                 #
@@ -150,8 +157,8 @@ def test_SourceUrl():
                 # Online_Resource: http://www1.ncdc.noaa.gov/pub/data/paleo/
                 #
                 # Original_Source_URL: https://www.ncdc.noaa.gov/paleo-search/study/2622"""
-    v = records.SourceUrl(testlines)
-    assert v.original_source_url == 'https://www.ncdc.noaa.gov/paleo-search/study/2622'
+    v = records.fetch_sourceurl(testlines)
+    assert v == 'https://www.ncdc.noaa.gov/paleo-search/study/2622'
 
 
 def test_NcdcRecord_chron_data(testchrondatalines):
