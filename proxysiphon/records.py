@@ -4,7 +4,19 @@ import proxysiphon.proxychimp as proxychimp
 
 
 def read_ncdc(filepath_or_buffer, encoding=None):
-    """Read NOAA NCDC txt file"""
+    """Read NOAA NCDC txt file
+
+    Parameters
+    ----------
+    filepath_or_buffer
+    encoding : str or None, optional
+        File encoding. Default is None which attempts to guess the encoding with
+        `chardet.detect`.
+
+    Returns
+    -------
+    out : NcdcRecord
+    """
     with open(filepath_or_buffer, 'rb') as fl:
         flbytes = fl.read()
     if encoding is None:
@@ -46,16 +58,25 @@ def find_values(x, k, sep=':', fun=None):
 
 
 class SiteInformation:
+    """
+    Attributes
+    ----------
+    site_name : str or None
+    location : str or None
+    country : str or None
+    northernmost_latitude : float or None
+    southernmost_latitude : float or None
+    easternmost_longitude : float or None
+    westernmost_longitude : float or None
+    elevation : float or None
+    """
     def __init__(self, s):
-        self.site_name = None
-        self.location = None
-        self.country = None
-        self.northernmost_latitude = None
-        self.southernmost_latitude = None
-        self.easternmost_longitude = None
-        self.westernmost_longitude = None
-        self.elevation = None
-
+        """
+        Parameters
+        ----------
+        s : str
+            'Site Information' section string from NOAA NCDC file.
+        """
         s = str(s)
         s = s.splitlines()
         self.site_name = find_values(s, '# Site_Name:', fun=str)
@@ -69,15 +90,24 @@ class SiteInformation:
 
 
 class DataCollection:
+    """
+    Attributes
+    ----------
+    collection_name : str or None
+    first_year : float or None
+    last_year : float or None
+    time_unit : str or None
+    core_length : str or None
+    notes : str or None
+    collection_year int or None
+    """
     def __init__(self, s):
-        self.collection_name = None
-        self.first_year = None
-        self.last_year = None
-        self.time_unit = None
-        self.core_length = None
-        self.notes = None
-        self.collection_year = None
-
+        """
+        Parameters
+        ----------
+        s : str
+            'Data Collection' section string from NOAA NCDC file.
+        """
         s = str(s)
         s = s.splitlines()
         self.collection_name = find_values(s, 'Collection_Name:', fun=str)
@@ -90,25 +120,74 @@ class DataCollection:
 
 
 class ChronologyInformation:
+    """
+    Attributes
+    ----------
+    df : pandas.DataFrame or None
+        DataFrame of chronology information.
+    """
     def __init__(self, s):
+        """
+        Parameters
+        ----------
+        s : sequence
+            First member is 'Chronology Information' section string from NOAA
+            NCDC file. Second is a pandas.DataFrame of chronology information
+            table.
+        """
         self.df = None
         if len(s) == 2:
-            s_describe = s[0]
+            # s_describe = s[0]
             self.df = s[1].copy()
 
 
 class Data:
+    """
+    Attributes
+    ----------
+    df : pandas.DataFrame or None
+        DataFrame of core data.
+    """
     def __init__(self, s):
+        """
+        Parameters
+        ----------
+        s : str
+            First member is 'Data' section string from NOAA NCDC file. Second
+            is a pandas.DataFrame of proxy data
+            table.
+        """
         self.df = None
         if len(s) == 2:
-            s_describe = s[0]
+            # s_describe = s[0]
             self.df = s[1].copy()
 
 
 class Publication:
+    """
+    Attributes
+    ----------
+    authors : str or None
+    published_date_or_year : int or None
+    published_title: str or None
+    journal_name : str or None
+    volume : str or None
+    edition : str or None
+    issue : str or None
+    pages : str or None
+    report_number : str or None
+    doi : str or None
+    online_resource : str or None
+    full_citation : str or None
+    abstract : str or None
+    """
     def __init__(self, s):
-        self.doi = None
-
+        """
+        Parameters
+        ----------
+        s : str
+            Single 'Publication' section string from NOAA NCDC file.
+        """
         s = str(s)
         s = s.splitlines()
         self.authors = find_values(s, '# Authors:', fun=str)
@@ -183,7 +262,6 @@ class NcdcRecord:
     """
     def __init__(self, s):
         """
-
         Parameters
         ----------
         s : str
