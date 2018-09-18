@@ -70,23 +70,42 @@ class SiteInformation:
     westernmost_longitude : float or None
     elevation : float or None
     """
-    def __init__(self, s):
+    def __init__(self, s=None, **kwargs):
         """
         Parameters
         ----------
-        s : str
-            'Site Information' section string from NOAA NCDC file.
+        s : str or None, optional
+            A string of 'Site Information' section from NOAA
+            NCDC file. If `None`, then information is taken from `**kwargs`.
+        **kwargs : optional
+            Keywords value pairs are assigned to object attributes. Overwrites
+            values in `s`.
         """
-        s = str(s)
-        s = s.splitlines()
-        self.site_name = find_values(s, '# Site_Name:', fun=str)
-        self.location = find_values(s, '# Location:', fun=str)
-        self.country = find_values(s, '# Country:', fun=str)
-        self.northernmost_latitude = find_values(s, '# Northernmost_Latitude:', fun=float)
-        self.southernmost_latitude = find_values(s, '# Southernmost_Latitude:', fun=float)
-        self.easternmost_longitude = find_values(s, '# Easternmost_Longitude:', fun=float)
-        self.westernmost_longitude = find_values(s, '# Westernmost_Longitude:', fun=float)
-        self.elevation = find_values(s, '# Elevation:', fun=float)
+        self.site_name = None
+        self.location = None
+        self.country = None
+        self.northernmost_latitude = None
+        self.southernmost_latitude = None
+        self.easternmost_longitude = None
+        self.westernmost_longitude = None
+        self.elevation = None
+
+        if s is not None:
+            s = str(s)
+            s = s.splitlines()
+            self.site_name = find_values(s, '# Site_Name:', fun=str)
+            self.location = find_values(s, '# Location:', fun=str)
+            self.country = find_values(s, '# Country:', fun=str)
+            self.northernmost_latitude = find_values(s, '# Northernmost_Latitude:', fun=float)
+            self.southernmost_latitude = find_values(s, '# Southernmost_Latitude:', fun=float)
+            self.easternmost_longitude = find_values(s, '# Easternmost_Longitude:', fun=float)
+            self.westernmost_longitude = find_values(s, '# Westernmost_Longitude:', fun=float)
+            self.elevation = find_values(s, '# Elevation:', fun=float)
+
+        allowed_keys = ['site_name', 'location', 'country', 'northernmost_latitude',
+                        'southernmost_latitude', 'easternmost_longitude',
+                        'westernmost_longitude', 'elevation']
+        self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
 
 
 class DataCollection:
@@ -101,22 +120,39 @@ class DataCollection:
     notes : str or None
     collection_year int or None
     """
-    def __init__(self, s):
+    def __init__(self, s=None, **kwargs):
         """
         Parameters
         ----------
-        s : str
-            'Data Collection' section string from NOAA NCDC file.
+        s : str or None, optional
+            'Data Collection' section string from NOAA NCDC file.  If `None`,
+            then information is taken from `**kwargs`.
+        **kwargs : optional
+            Keywords value pairs are assigned to object attributes. Overwrites
+            values in `s`.
         """
-        s = str(s)
-        s = s.splitlines()
-        self.collection_name = find_values(s, 'Collection_Name:', fun=str)
-        self.first_year = find_values(s, 'First_Year:', fun=float)
-        self.last_year = find_values(s, 'Last_Year:', fun=float)
-        self.time_unit = find_values(s, 'Time_Unit:', fun=str)
-        self.core_length = find_values(s, 'Core_Length:', fun=str)
-        self.notes = find_values(s, 'Notes:', fun=str)
-        self.collection_year = find_values(s, 'Collection_Year:', fun=int)
+        self.collection_name = None
+        self.first_year = None
+        self.last_year = None
+        self.time_unit = None
+        self.core_length = None
+        self.notes = None
+        self.collection_year = None
+
+        if s is not None:
+            s = str(s)
+            s = s.splitlines()
+            self.collection_name = find_values(s, 'Collection_Name:', fun=str)
+            self.first_year = find_values(s, 'First_Year:', fun=float)
+            self.last_year = find_values(s, 'Last_Year:', fun=float)
+            self.time_unit = find_values(s, 'Time_Unit:', fun=str)
+            self.core_length = find_values(s, 'Core_Length:', fun=str)
+            self.notes = find_values(s, 'Notes:', fun=str)
+            self.collection_year = find_values(s, 'Collection_Year:', fun=int)
+
+        allowed_keys = ['collection_name', 'first_year', 'last_year',
+                        'time_unit', 'core_length', 'notes', 'collection_year']
+        self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
 
 
 class ChronologyInformation:
@@ -126,19 +162,27 @@ class ChronologyInformation:
     df : pandas.DataFrame or None
         DataFrame of chronology information.
     """
-    def __init__(self, s):
+    def __init__(self, s=None, **kwargs):
         """
         Parameters
         ----------
-        s : sequence
+        s : sequence or None, optional
             First member is 'Chronology Information' section string from NOAA
             NCDC file. Second is a pandas.DataFrame of chronology information
             table.
+        **kwargs : optional
+            Keywords value pairs are assigned to object attributes. Overwrites
+            values in `s`.
         """
         self.df = None
-        if len(s) == 2:
+
+        if s is not None:
+            assert len(s) == 2, 'len(s) must equal 2'
             # s_describe = s[0]
             self.df = s[1].copy()
+
+        allowed_keys = ['df']
+        self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
 
 
 class Data:
@@ -148,19 +192,26 @@ class Data:
     df : pandas.DataFrame or None
         DataFrame of core data.
     """
-    def __init__(self, s):
+    def __init__(self, s=None, **kwargs):
         """
         Parameters
         ----------
-        s : str
+        s : sequence or None, optional
             First member is 'Data' section string from NOAA NCDC file. Second
-            is a pandas.DataFrame of proxy data
-            table.
+            is a pandas.DataFrame of proxy data table.
+        **kwargs : optional
+            Keywords value pairs are assigned to object attributes. Overwrites
+            values in `s`.
         """
         self.df = None
-        if len(s) == 2:
+
+        if s is not None:
+            assert len(s) == 2, 'len(s) must equal 2'
             # s_describe = s[0]
             self.df = s[1].copy()
+
+        allowed_keys = ['df']
+        self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
 
 
 class Publication:
@@ -181,29 +232,53 @@ class Publication:
     full_citation : str or None
     abstract : str or None
     """
-    def __init__(self, s):
+    def __init__(self, s=None, **kwargs):
         """
         Parameters
         ----------
         s : str
             Single 'Publication' section string from NOAA NCDC file.
+        **kwargs : optional
+            Keywords value pairs are assigned to object attributes. Overwrites
+            values in `s`.
         """
-        s = str(s)
-        s = s.splitlines()
-        self.authors = find_values(s, '# Authors:', fun=str)
-        self.published_date_or_year = find_values(s, '# Published_Date_or_Year:',
-                                                  fun=int)
-        self.published_title = find_values(s, '# Published_Title:', fun=str)
-        self.journal_name = find_values(s, '# Journal_Name:', fun=str)
-        self.volume = find_values(s, '# Volume:', fun=str)
-        self.edition = find_values(s, '# Edition:', fun=str)
-        self.issue = find_values(s, '# Issue:', fun=str)
-        self.pages = find_values(s, '# Pages:', fun=str)
-        self.report_number = find_values(s, '# Report Number:', fun=str)
-        self.doi = find_values(s, '# DOI:', fun=str)
-        self.online_resource = find_values(s, '# Online_Resource:', fun=str)
-        self.full_citation = find_values(s, '# Full_Citation:', fun=str)
-        self.abstract = find_values(s, '# Abstract:', fun=str)
+        self.authors = None
+        self.published_date_or_year = None
+        self.published_title = None
+        self.journal_name = None
+        self.volume = None
+        self.edition = None
+        self.issue = None
+        self.pages = None
+        self.report_number = None
+        self.doi = None
+        self.online_resource = None
+        self.full_citation = None
+        self.abstract = None
+
+        if s is not None:
+            s = str(s)
+            s = s.splitlines()
+            self.authors = find_values(s, '# Authors:', fun=str)
+            self.published_date_or_year = find_values(s, '# Published_Date_or_Year:',
+                                                      fun=int)
+            self.published_title = find_values(s, '# Published_Title:', fun=str)
+            self.journal_name = find_values(s, '# Journal_Name:', fun=str)
+            self.volume = find_values(s, '# Volume:', fun=str)
+            self.edition = find_values(s, '# Edition:', fun=str)
+            self.issue = find_values(s, '# Issue:', fun=str)
+            self.pages = find_values(s, '# Pages:', fun=str)
+            self.report_number = find_values(s, '# Report Number:', fun=str)
+            self.doi = find_values(s, '# DOI:', fun=str)
+            self.online_resource = find_values(s, '# Online_Resource:', fun=str)
+            self.full_citation = find_values(s, '# Full_Citation:', fun=str)
+            self.abstract = find_values(s, '# Abstract:', fun=str)
+
+        allowed_keys = ['authors', 'published_date_or_year', 'published_title',
+                        'journal_name', 'volume', 'edition', 'issue', 'pages',
+                        'report_number', 'doi', 'online_resource',
+                        'full_citation', 'abstract']
+        self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
 
 
 def fetch_description(s):
