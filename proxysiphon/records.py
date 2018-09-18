@@ -1,4 +1,3 @@
-import datetime
 from chardet import detect as chdetect
 
 import proxysiphon.proxychimp as proxychimp
