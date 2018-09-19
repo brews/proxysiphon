@@ -25,7 +25,7 @@ setup(
 
     packages=find_packages(exclude=['docs']),
 
-    install_requires=['numpy', 'scipy', 'matplotlib', 'pandas', 'cartopy', 'attrs',
+    install_requires=['numpy', 'scipy', 'matplotlib', 'pandas', 'cartopy',
                       'chardet', 'carbonferret', 'snakebacon', 'erebusfall'],
     tests_require=['pytest'],
     package_data={'proxysiphon': ['tests/*.txt']},

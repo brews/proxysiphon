@@ -2,9 +2,9 @@ import logging
 import collections
 import datetime
 from io import BytesIO
-
 import pandas as pd
 from chardet import detect as chdetect
+import proxysiphon.records as records
 
 
 DIVIDER = '#------------------------'
@@ -80,15 +80,37 @@ def grab_contribution_date(g):
             d = datetime.date(int(d_str[0]), int(d_str[1]), int(d_str[2]))
     return d
 
-def plot_sitemap(g):
-    """Plot site location on global map from proxychimp.Guts"""
-    pass
 
+def find_values(x, k, sep=':', fun=None):
+    """Find values in a list of strings containing [k][sep][values]
 
-def plot_agedepth(g):
-    """Plot given age-depth relationship from proxychimp.Guts data"""
-    pass
+    Parameters
+    ----------
+    x : iterable
+        Iterable of strings representing lines in a file.
+    k : str
+        A key or pattern that to search x for.
+    sep : str
+        A separator that divides the `k` pattern from the target value.
+    fun : function-like, optional
+        Function used to format target value before returning.
 
+    Returns
+    -------
+    The target value is returned after removing excess whitespace from left
+    and right of the value. If the key or target pattern is not found,
+    then None is returned. If an empty string, or whitespace is the found
+    value, then None is returned.
+    """
+    out = None
+    for l in x:
+        if k in l and sep in l:
+            val = l.split(sep, maxsplit=1)[1:][0].lstrip().rstrip()
+            if val != '':
+                out = val
+    if fun is not None and out is not None:
+        out = fun(out)
+    return out
 
 
 class Guts:
@@ -189,7 +211,7 @@ class Guts:
         return df
 
     def yank_chron_df(self, section_name='Chronology_Information', missingvalues=None):
-        """Get chronology information as dataframe"""
+        """Get chronology information as pandas.DataFrame"""
         if missingvalues is None:
             missingvalues = [-999, 'NaN']
         section = self.pull_section(section_name)[0]
@@ -269,3 +291,178 @@ class Guts:
         else:
             result = False
         return result
+
+    def yank_original_source_url(self):
+        """Get string of original source URL
+
+        Returns
+        -------
+        out : str or None
+
+        Raises
+        ------
+        AssertionError
+            If more than one section is found in the file data.
+        """
+        target_section = 'NOTE: Please cite original publication, online ' \
+                         'resource and date accessed when using this data.'
+        target_key = 'Original_Source_URL:'
+
+        sections = self.pull_section(target_section)
+        assert len(sections) < 2, 'More than one section found'
+        section = sections[0]
+
+        try:
+            out = find_values(section, target_key, fun=str)
+        except AttributeError:
+            # target key not found in string
+            out = None
+
+        return out
+
+    def yank_data_collection(self):
+        """Get data collection information
+
+        Returns
+        -------
+        out : dict or None
+
+        Raises
+        ------
+        AssertionError
+            If more than one section is found in the file data.
+        """
+        target_section = 'Data_Collection'
+        # List of tuples, tuples give (dict_key, source_key, type_fun)
+        target_keys = [('collection_name', 'Collection_Name:', str),
+                       ('first_year', 'First_Year:', int),
+                       ('last_year', 'Last_Year:', int),
+                       ('time_unit', 'Time_Unit:', str),
+                       ('core_length', 'Core_Length:', str),
+                       ('notes', 'Notes:', str),
+                       ('collection_year', 'Collection_Year:', int)]
+        out = {k[0]:None for k in target_keys}
+
+        sections = self.pull_section(target_section)
+        assert len(sections) < 2, 'More than one section found'
+        section = sections[0]
+
+        for dict_key, source_key, type_fun in target_keys:
+            out[dict_key] = find_values(section, source_key, fun=type_fun)
+
+        return out
+
+    def yank_description_and_notes(self):
+        """Get string of description and notes
+
+        Returns
+        -------
+        out : str or None
+
+        Raises
+        ------
+        AssertionError
+            If more than one section is found in the file data.
+        """
+        target_section = 'Description and Notes'
+        target_key = 'Description:'
+
+        sections = self.pull_section(target_section)
+        assert len(sections) < 2, 'More than one section found'
+        section = sections[0]
+
+        try:
+            out = find_values(section, target_key, fun=str)
+        except AttributeError:
+            # target key not found in string
+            out = None
+
+        return out
+
+    def yank_publication(self):
+        """Get list of publication information
+
+        Returns
+        -------
+        out : list[dict]
+        """
+        target_section = 'Publication'
+        # List of tuples, tuples give (dict_key, source_key, type_fun)
+        target_keys = [('authors', '# Authors:', str),
+                       ('published_date_or_year', '# Published_Date_or_Year:', int),
+                       ('published_title', '# Published_Title:', str),
+                       ('journal_name', '# Journal_Name:', str),
+                       ('volume', '# Volume:', str),
+                       ('edition', '# Edition:', str),
+                       ('issue', '# Issue:', str),
+                       ('pages', '# Pages:', str),
+                       ('report_number', '# Report Number:', str),
+                       ('doi', '# DOI:', str),
+                       ('online_resource', '# Online_Resource:', str),
+                       ('full_citation', '# Full_Citation:', str),
+                       ('abstract', '# Abstract:', str)]
+        dict_template = {k[0]:None for k in target_keys}
+
+        out = []
+        sections = self.pull_section(target_section)
+
+        for section in sections:
+
+            this_pub = dict_template.copy()
+            for dict_key, source_key, type_fun in target_keys:
+                this_pub[dict_key] = find_values(section, source_key, fun=type_fun)
+            out.append(this_pub)
+
+        return out
+
+    def yank_site_information(self):
+        """Get site information
+
+        Returns
+        -------
+        out : dict
+
+        Raises
+        ------
+        AssertionError
+            If more than one section is found in the file data.
+        """
+        target_section = 'Site Information'
+        # List of tuples, tuples give (dict_key, source_key, type_fun)
+        target_keys = [('site_name', '# Site_Name:', str),
+                       ('location', '# Location:', str),
+                       ('country', '# Country:', str),
+                       ('northernmost_latitude', '# Northernmost_Latitude:', float),
+                       ('southernmost_latitude', '# Southernmost_Latitude:', float),
+                       ('easternmost_longitude', '# Easternmost_Longitude:', float),
+                       ('westernmost_longitude', '# Westernmost_Longitude:', float),
+                       ('elevation', '# Elevation:', float)]
+        out = {k[0]:None for k in target_keys}
+
+        sections = self.pull_section(target_section)
+        assert len(sections) < 2, 'More than one section found'
+        section = sections[0]
+
+        for dict_key, source_key, type_fun in target_keys:
+            out[dict_key] = find_values(section, source_key, fun=type_fun)
+
+        return out
+
+    def to_ncdcrecord(self):
+        """to NcdcRecord instance"""
+        chron = records.ChronologyInformation(df=self.yank_chron_df())
+        d = records.Data(df=self.yank_data_df())
+        d_collection = records.DataCollection(**self.yank_data_collection())
+        description = self.yank_description_and_notes()
+        orig_url = list(self.yank_original_source_url())
+        pubs = [records.Publication(**p) for p in self.yank_publication()]
+        site_info = records.SiteInformation(**self.yank_site_information())
+
+        out = records.NcdcRecord(chronology_information=chron,
+                                 data=d,
+                                 data_collection=d_collection,
+                                 description=description,
+                                 original_source_url=orig_url,
+                                 publication=pubs,
+                                 site_information=site_info)
+        return out

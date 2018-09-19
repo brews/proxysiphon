@@ -1,5 +1,6 @@
 # proxysiphon v0.0.1a1
 
+* Refactoring to use Python 3.7 `dataclasses` to simplify code.
 * More flexible record creation with keywords.
 * `NcdcRecord` `description` and `original_source_url` attributes refactored to simple string.
 * Removed `contribution_date` attribute from `NcdcRecord`.
