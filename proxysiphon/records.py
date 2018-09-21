@@ -88,6 +88,6 @@ class NcdcRecord:
     data: Data = None
     data_collection: DataCollection = None
     description: str = None
-    original_source_url: list = field(default_factory=list)
+    original_source_url: str = None
     publication: list = field(default_factory=list)
     site_information: SiteInformation = None

@@ -1,9 +1,10 @@
 # proxysiphon v0.0.1a1
 
 * Refactoring to use Python 3.7 `dataclasses` to simplify code.
+* `NcdcRecord.original_source_url` is now an optional string with a default value of None.
 * More flexible record creation with keywords.
 * `NcdcRecord` `description` and `original_source_url` attributes refactored to simple string.
-* Removed `contribution_date` attribute from `NcdcRecord`.
+* Removed `contribution_date` attribute from `NcdcRecord`. This was unused in our analysis.
 * Grab new field from proxy text files ("Description" and "Original_Source_URL").
 * Now pull more fields from "Publication" section, including support for multiple publicatioins.
 * `Guts.pull_section()` now returns list of lists to deal with sections that appear multiple times (i.e. "Publication").

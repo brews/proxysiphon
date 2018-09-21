@@ -454,7 +454,7 @@ class Guts:
         d = records.Data(df=self.yank_data_df())
         d_collection = records.DataCollection(**self.yank_data_collection())
         description = self.yank_description_and_notes()
-        orig_url = list(self.yank_original_source_url())
+        orig_url = self.yank_original_source_url()
         pubs = [records.Publication(**p) for p in self.yank_publication()]
         site_info = records.SiteInformation(**self.yank_site_information())
 
