@@ -43,8 +43,8 @@ class SiteInformation:
 class DataCollection:
     """Proxy site data collection information"""
     collection_name: str = None
-    first_year: int = None
-    last_year: int = None
+    first_year: float = None
+    last_year: float = None
     time_unit: str = None
     core_length: str = None
     notes: str = None

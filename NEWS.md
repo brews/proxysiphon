@@ -2,6 +2,7 @@
 
 * Refactoring to use Python 3.7 `dataclasses` to simplify code.
 * `NcdcRecord.original_source_url` is now an optional string with a default value of None.
+* `DataCollection` `first_year` & `last_year` are now floats and not int.
 * More flexible record creation with keywords.
 * `NcdcRecord` `description` and `original_source_url` attributes refactored to simple string.
 * Removed `contribution_date` attribute from `NcdcRecord`. This was unused in our analysis.
