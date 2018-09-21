@@ -335,8 +335,8 @@ class Guts:
         target_section = 'Data_Collection'
         # List of tuples, tuples give (dict_key, source_key, type_fun)
         target_keys = [('collection_name', 'Collection_Name:', str),
-                       ('first_year', 'First_Year:', int),
-                       ('last_year', 'Last_Year:', int),
+                       ('first_year', 'First_Year:', float),
+                       ('last_year', 'Last_Year:', float),
                        ('time_unit', 'Time_Unit:', str),
                        ('core_length', 'Core_Length:', str),
                        ('notes', 'Notes:', str),
