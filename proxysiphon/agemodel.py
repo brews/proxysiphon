@@ -96,16 +96,15 @@ def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, 
     # n_segs = np.ceil((d_max - d_min) / 10)
     # assert (n_segs < 500) and (n_segs > 5)  # Sanity check for extremely long or short MCMC runs.
 
-    mcmc_params = dict(depth_min = d_min, depth_max = d_max,
-                       cc = chron.cc.values,
-                       d_r = chron.delta_R.values,
-                       d_std = chron.delta_R_1s_err.values,
-                       t_a =[3], t_b=[4],
-                       k = 50,#n_segs,
-                       minyr = minyr, maxyr = 50000,
-                       th01 = guesses[0], th02 = guesses[1],
-                       acc_mean = sug_acc_mean, acc_shape = 1.5,
-                       mem_strength = 4, mem_mean = 0.7)
+    mcmc_params = dict(depth_min=d_min, depth_max=d_max,
+                       cc=chron.cc.values,
+                       d_r=chron.delta_R.values,
+                       d_std=chron.delta_R_1s_err.values,
+                       t_a=[3], t_b=[4], k=50,#n_segs,
+                       minyr=minyr, maxyr=50000,
+                       th01=guesses[0], th02=guesses[1],
+                       acc_mean=sug_acc_mean, acc_shape=1.5,
+                       mem_strength=4, mem_mean=0.7)
 
     if mcmc_kws is not None:
         mcmc_params.update(mcmc_kws)
@@ -113,8 +112,9 @@ def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, 
     log.debug('MCMC parameters: {}'.format(mcmc_params))
 
     agemodel = sb.AgeDepthModel(coredates, mcmc_kws=mcmc_params)
-    log.debug('Age model fit done.')
-    return agemodel, coredates
+    log.debug('Age model fit done')
+    return agemodel, coredates, mcmc_params
+
 
 
 def date_proxy(admodel, pdata, nsims):

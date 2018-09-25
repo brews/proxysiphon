@@ -6,6 +6,7 @@
 * More flexible record creation with keywords.
 * `NcdcRecord` `description` and `original_source_url` attributes refactored to simple string.
 * Removed `contribution_date` attribute from `NcdcRecord`. This was unused in our analysis.
+* `proxysiphon.agemodel.fit_agedepthmodel` now also returns snakebacon agemodel kwargs.
 * Grab new field from proxy text files ("Description" and "Original_Source_URL").
 * Now pull more fields from "Publication" section, including support for multiple publicatioins.
 * `Guts.pull_section()` now returns list of lists to deal with sections that appear multiple times (i.e. "Publication").
