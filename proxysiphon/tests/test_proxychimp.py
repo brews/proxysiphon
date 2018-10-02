@@ -105,6 +105,13 @@ def dumb_guts():
                '#',
                '# Labcode\tdepth_top\tdepth_bottom\tmat_dated\t14C_date\t14C_1s_err\tdelta_R\tdelta_R_1s_err\tother_date\tother_1s_err\tother_type\t',
                '#',
+               '#---------------------------------------',
+               '# Variables',
+               '# Data variables follow that are preceded by "##" in columns one and two.',
+               '# Variables list, one per line, shortname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)',
+               '## depth	,,,cm,,,,,',
+               '## age	,,,cal yr BP,,,,,',
+               '## bacon	,,,index,,,,,',
                '#------------------------',
                '# Data',
                '# Data lines follow (have no #)',
@@ -148,7 +155,7 @@ def test_str_guts__init_():
 def test__divide_portions(dumb_guts):
     goal_data = ['depth\tage\tbacon', '1\t2\t3', '4\t5\t6']
     goal_description_ends = ('#------------------------', '# Missing Value: -999')
-    goal_beginline = 63
+    goal_beginline = 70
     assert goal_data == dumb_guts.data
     assert goal_description_ends[0] == dumb_guts.description[0]
     assert goal_description_ends[-1] == dumb_guts.description[-1]
@@ -158,9 +165,9 @@ def test__divide_portions(dumb_guts):
 def test__write_sectionindex(dumb_guts):
     goal_index = {'Chronology_Information': [(55, 59)],
                   'Contribution_Date': [(12, 14)],
-                  'Data': [(60, 63)],
+                  'Data': [(67, 70)],
                   'Title': [(15, 17)]}
-    assert 9 == len(dumb_guts.sectionindex.keys())
+    assert 10 == len(dumb_guts.sectionindex.keys())
     for k, goal in goal_index.items():
         assert goal == dumb_guts.sectionindex[k]
 
@@ -175,11 +182,10 @@ def test_pull_section_badname(dumb_guts):
     with pytest.raises(KeyError):
         dumb_guts.pull_section('data')
 
-
 def test_available_sections(dumb_guts):
     goal = ['Contribution_Date', 'Title', 'Data_Collection',
             'Site Information', 'Description and Notes', 'Publication',
-            'Chronology_Information', 'Data']
+            'Chronology_Information', 'Variables', 'Data']
     # Skip first section as it is very long:
     assert goal == dumb_guts.available_sections()[1:]
 
@@ -237,6 +243,11 @@ def test_yank_data_collection(dumb_guts):
     assert v['core_length'] is None
     assert 'mg_red' == v['notes']
     assert 1923 == v['collection_year']
+
+
+def test_pull_variables(dumb_guts):
+    v = dumb_guts.yank_variables()
+    assert 'cm' == v['depth'][3]
 
 
 def test_yank_description_and_notes(dumb_guts):

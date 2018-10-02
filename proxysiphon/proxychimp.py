@@ -415,6 +415,35 @@ class Guts:
 
         return out
 
+    def yank_variables(self):
+        """Get variable section information
+
+        Returns
+        -------
+        out : dict
+
+        Raises
+        ------
+        AssertionError
+            If more than one section is found in the file data.
+        """
+        target_section = 'Variables'
+        sections = self.pull_section(target_section)
+        assert len(sections) < 2, 'More than one section found'
+        section = sections[0]
+
+        out = {}
+        for ln in section:
+
+            # Skip line if not data variables line.
+            if ln[:3] != '## ':
+                continue
+
+            var_name, components_group = ln[3:].split('\t')
+            out[var_name] = tuple(components_group.split(','))
+
+        return out
+
     def yank_site_information(self):
         """Get site information
 
@@ -458,11 +487,17 @@ class Guts:
         pubs = [records.Publication(**p) for p in self.yank_publication()]
         site_info = records.SiteInformation(**self.yank_site_information())
 
+        vars = {}
+        file_vars = self.yank_variables()
+        for k,v in file_vars.items():
+            vars[k] = records.VariableInfo(*v)
+
         out = records.NcdcRecord(chronology_information=chron,
                                  data=d,
                                  data_collection=d_collection,
                                  description=description,
                                  original_source_url=orig_url,
                                  publication=pubs,
-                                 site_information=site_info)
+                                 site_information=site_info,
+                                 variables=vars)
         return out

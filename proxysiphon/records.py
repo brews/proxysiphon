@@ -50,6 +50,18 @@ class DataCollection:
     notes: str = None
     collection_year: int = None
 
+@dataclass
+class VariableInfo:
+    """Proxy site Data Variable information"""
+    what: str
+    material: str
+    error: str
+    units: str
+    seasonality: str
+    archive: str
+    detail: str
+    method: str
+    datatype: str
 
 @dataclass
 class ChronologyInformation:
@@ -91,3 +103,4 @@ class NcdcRecord:
     original_source_url: str = None
     publication: list = field(default_factory=list)
     site_information: SiteInformation = None
+    variables: dict = field(default_factory=dict)

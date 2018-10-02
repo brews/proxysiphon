@@ -1,6 +1,7 @@
 # proxysiphon v0.0.1a1
 
 * Refactoring to use Python 3.7 `dataclasses` to simplify code.
+* New `Guts.yank_variables()` and `NcdcRecord.Variables` classes for the "Variables" file section.
 * `NcdcRecord.original_source_url` is now an optional string with a default value of None.
 * `DataCollection` `first_year` & `last_year` are now floats and not int.
 * More flexible record creation with keywords.
