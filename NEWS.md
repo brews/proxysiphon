@@ -13,6 +13,7 @@
 * `Guts.pull_section()` now returns list of lists to deal with sections that appear multiple times (i.e. "Publication").
 * Fix missing dependency in setup.py.
 
+
 # proxysiphon v0.0.1a0
 
 * Initial release.
