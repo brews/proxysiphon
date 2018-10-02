@@ -1,3 +1,6 @@
+# proxysiphon v0.0.1a2
+
+
 # proxysiphon v0.0.1a1
 
 * Refactoring to use Python 3.7 `dataclasses` to simplify code.
