@@ -1,5 +1,7 @@
 # proxysiphon v0.0.1a2
 
+* New method `records.Publication.to_citationstr()` to get quick and dirty bibliography strings.
+
 
 # proxysiphon v0.0.1a1
 

@@ -92,6 +92,34 @@ class Publication:
     full_citation: str = None
     abstract: str = None
 
+    def to_citationstr(self):
+        """Citation str of publication"""
+        if self.full_citation is not None:
+            return str(self.full_citation)
+
+        out = '{authors} ({year}): {title}.'.format(authors=self.authors,
+                                                    year=self.published_date_or_year,
+                                                    title=self.published_title)
+        # This is a bit lazy...
+        if self.journal_name is not None:
+            out += ' {},'.format(self.journal_name)
+        if self.edition is not None:
+            out += ' {},'.format(self.edition)
+        if self.volume is not None:
+            out += ' {},'.format(self.volume)
+        if self.issue is not None:
+            out += ' {},'.format(self.issue)
+        if self.pages is not None:
+            out += ' {},'.format(self.pages)
+        if self.report_number is not None:
+            out += ' {},'.format(self.report_number)
+        if self.doi is not None:
+            out += ' doi:{}'.format(self.doi)
+        if self.online_resource is not None:
+            out += ' {}'.format(self.online_resource)
+
+        return out
+
 
 @dataclass
 class NcdcRecord:
