@@ -206,8 +206,7 @@ class Guts:
         lines = [x.rstrip() for x in self.data]
         data_bytes = '\n'.join(lines).encode('utf-8')
         missingvalues = self.guess_missingvalues()
-        df = pd.read_table(BytesIO(data_bytes), na_values=missingvalues)
-        # df = pd.read_table(BytesIO(data_bytes), na_values=[-999, 'NaN'])
+        df = pd.read_csv(BytesIO(data_bytes), sep='\t', na_values=missingvalues)
         return df
 
     def yank_chron_df(self, section_name='Chronology_Information', missingvalues=None):
@@ -219,7 +218,7 @@ class Guts:
         g_chrond = section[start_idx:]
         g_chrond_cleaned = [x[2:].rstrip() for x in g_chrond]  # Removes the '# ' and ending white space.
         data_bytes = '\n'.join(g_chrond_cleaned).encode('utf-8')
-        df = pd.read_table(BytesIO(data_bytes), na_values=missingvalues)
+        df = pd.read_csv(BytesIO(data_bytes), sep='\t', na_values=missingvalues)
         return df
 
     def guess_missingvalues(self):
