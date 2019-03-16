@@ -1,5 +1,7 @@
 # proxysiphon v0.0.1a2
 
+* Add `PetmRecord` and 'LgmRecord', specialized subclasses of `NcdcRecord`.
+* Add `.to_netcdf()` method to `NcdcRecord`.
 * New method `records.Publication.to_citationstr()` to get quick and dirty bibliography strings.
 
 
