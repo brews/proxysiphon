@@ -29,6 +29,42 @@ def read_ncdc(filepath_or_buffer, encoding=None):
     return g.to_ncdcrecord()
 
 
+def read_lgm(filepath_or_buffer, encoding=None):
+    """Read NOAA NCDC txt file for LGM proxies
+
+    Parameters
+    ----------
+    filepath_or_buffer
+    encoding : str or None, optional
+        File encoding. Default is None which attempts to guess the encoding with
+        `chardet.detect`.
+
+    Returns
+    -------
+    out : NcdcRecord
+    """
+    out = read_ncdc(filepath_or_buffer, encoding=None)
+    return LgmRecord(**out.__dict__)
+
+
+def read_petm(filepath_or_buffer, encoding=None):
+    """Read NOAA NCDC txt file for PETM proxies
+
+    Parameters
+    ----------
+    filepath_or_buffer
+    encoding : str or None, optional
+        File encoding. Default is None which attempts to guess the encoding with
+        `chardet.detect`.
+
+    Returns
+    -------
+    out : NcdcRecord
+    """
+    out = read_ncdc(filepath_or_buffer, encoding=None)
+    return PetmRecord(**out.__dict__)
+
+
 def _normalize_to_ascii_array(a, dtype='S50'):
     """Normalize sequence of UTF-8 string to np.Array of ASCII"""
     normed = np.array([unidecode.unidecode(str(x)) for x in a], dtype=dtype)
