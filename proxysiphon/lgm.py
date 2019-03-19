@@ -387,16 +387,27 @@ class NetcdfMixin:
         depth = data.createVariable('depth', 'f4', ('depth',), zlib=True)
         depth.long_name = 'Sample depth'
         depth.positive = 'down'
-        depth.unints = 'cm'
         depth.axis = 'Z'
         depth[:] = self.data.df['depth'].values
 
+        file_depth_unit = str(self.variables['depth'].units)
+        if file_depth_unit == '' or file_depth_unit is None:
+            depth.units = 'cm'
+        else:
+            depth.units = file_depth_unit
+
+
         age_original = data.createVariable('age_original', 'f4', ('depth',),
                                            zlib=True)
-        age_original.units = 'cal years BP'
         age_original.missing_value = np.nan
         age_original.long_name = 'Original age'
         age_original[:] = self.data.df['age'].values
+
+        file_age_unit = str(self.variables['age'].units)
+        if file_age_unit == '' or file_age_unit is None:
+            age_original.units = 'cal years BP'
+        else:
+            age_original.units = file_age_unit
 
         if hasattr(self.data, 'age_ensemble') and hasattr(self.data, 'age_median'):
             data.createDimension('draw', self.data.age_ensemble.shape[1])
