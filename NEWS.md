@@ -1,5 +1,6 @@
 # proxysiphon v0.0.1a2
 
+* Add `nc2lmrh5`, a function to read output proxy NetCDF files and convert them to LMR-style HDF5 proxy files.
 * Add several methods to `LgmRecord` subclass for age modeling.
 * Add `PetmRecord` and `LgmRecord`, specialized subclasses of `NcdcRecord`. These are created with `read_lgm()` and `read_petm()`.
 * Add `.to_netcdf()` method to `NcdcRecord`.

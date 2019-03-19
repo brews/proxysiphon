@@ -27,7 +27,7 @@ setup(
 
     install_requires=['numpy', 'scipy', 'matplotlib', 'pandas', 'cartopy',
                       'chardet', 'carbonferret', 'snakebacon', 'erebusfall',
-                      'netCDF4', 'unidecode'],
+                      'netCDF4', 'unidecode', 'xarray', 'tables', 'shapely'],
     tests_require=['pytest'],
-    package_data={'proxysiphon': ['tests/*.txt']},
+    package_data={'proxysiphon': ['tests/*.txt', 'lmr_hdf5/*.nc']},
 )
