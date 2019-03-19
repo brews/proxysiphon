@@ -1,6 +1,7 @@
 # proxysiphon v0.0.1a2
 
-* Add `PetmRecord` and `LgmRecord`, specialized subclasses of `NcdcRecord`. These can be created with `read_lgm()` and `read_petm()`.
+* Add several methods to `LgmRecord` subclass for age modeling.
+* Add `PetmRecord` and `LgmRecord`, specialized subclasses of `NcdcRecord`. These are created with `read_lgm()` and `read_petm()`.
 * Add `.to_netcdf()` method to `NcdcRecord`.
 * New method `records.Publication.to_citationstr()` to get quick and dirty bibliography strings.
 
