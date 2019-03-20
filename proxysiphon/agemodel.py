@@ -3,7 +3,6 @@ import logging
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-import snakebacon as sb
 import carbonferret as cf
 
 
@@ -43,6 +42,12 @@ def get_deltar_online(latlon, max_distance=3000):
 
 def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, mcmc_kws=None):
     log.debug('Fitting new age model.')
+
+    try:
+        import snakebacon as sb
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('snakebacon needs to be installed for age models')
+
     if minyr is None:
         minyr = -1000
 

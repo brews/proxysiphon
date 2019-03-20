@@ -3,17 +3,25 @@ import copy
 import logging
 
 import numpy as np
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pylab as plt
-import cartopy.feature as cfeature
-import cartopy.crs as ccrs
 
 
 log = logging.getLogger(__name__)
 
 
-def write_reportpdf(qcplot_path, fldata, proxy_vars, latlon, deltar=None, deltar_error=None, proxys_median=None, agemodel=None):
+def write_reportpdf(qcplot_path, fldata, proxy_vars, latlon, deltar=None,
+                    deltar_error=None, proxys_median=None, agemodel=None):
     log.debug('Writing QC report plots')
+
+    try:
+        from matplotlib.backends.backend_pdf import PdfPages
+        import matplotlib.pylab as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
+    try:
+        import cartopy.crs as ccrs
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('cartopy needs to be installed for mapping')
 
     n_vars = len(proxy_vars)
     n_cols = n_vars + 1
@@ -74,6 +82,11 @@ def write_reportpdf(qcplot_path, fldata, proxy_vars, latlon, deltar=None, deltar
 
 
 def proxyvar_timeseries(proxys_median, var, ax=None):
+    try:
+        import matplotlib.pylab as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
     if ax is None:
         ax = plt.gca()
     # This is handled poorly on my part.
@@ -101,6 +114,11 @@ def proxyvar_timeseries(proxys_median, var, ax=None):
 
 def agedepth(agemodel, proxy_median, prior_dwidth=30, maxage=None, ax=None):
     """Plot comparing fit agemodel with age in the original proxy data"""
+    try:
+        import matplotlib.pylab as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
     if ax is None:
         ax = plt.gca()
 
@@ -128,6 +146,17 @@ def agedepth(agemodel, proxy_median, prior_dwidth=30, maxage=None, ax=None):
 
 def site_map(latlon, ax=None):
     """Simple global site map, given latlon"""
+    try:
+        import matplotlib.pylab as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
+    try:
+        import cartopy.crs as ccrs
+        import cartopy.feature as cfeature
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('cartopy needs to be installed for mapping')
+
     if ax is None:
         ax = plt.gca(projection=ccrs.Robinson(central_longitude=latlon[1]))
     ax.set_global()
@@ -138,6 +167,11 @@ def site_map(latlon, ax=None):
 
 
 def summary_text(fldata, deltar_used=None, deltar_error_used=None, ax=None):
+    try:
+        import matplotlib.pylab as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
     if ax is None:
         ax = plt.gca()
 
@@ -186,6 +220,11 @@ def summary_text(fldata, deltar_used=None, deltar_error_used=None, ax=None):
 
 def sedrate(agemodel, ax=None):
     """Plot prior and posterior sediment rates for agemodel"""
+    try:
+        import matplotlib.pylab as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
     if ax is None:
         ax = plt.gca()
     ax = agemodel.plot_sediment_rate(ax)
@@ -195,6 +234,12 @@ def sedrate(agemodel, ax=None):
 
 def sedmemory(agemodel, ax=None):
     """Plot prior and posterior sediment memory for agemodel"""
+    try:
+        from matplotlib.backends.backend_pdf import PdfPages
+        import matplotlib.pylab as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
     if ax is None:
         ax = plt.gca()
     ax = agemodel.plot_sediment_memory(ax)
