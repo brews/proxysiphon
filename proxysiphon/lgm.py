@@ -474,7 +474,13 @@ class NetcdfMixin:
         """Write NcdcRecord contents to a netCDF file
         """
         if isinstance(path_or_buffer, str):
-            with netCDF4.Dataset(filename=path_or_buffer, mode='a', format='NETCDF4') as fl:
-                self._attach_ncgroups(fl)
+            # Append to file, if it exists, if doesn't exist, create file.
+            try:
+                with netCDF4.Dataset(filename=path_or_buffer, mode='a', format='NETCDF4') as fl:
+                    self._attach_ncgroups(fl)
+            except FileNotFoundError:
+                with netCDF4.Dataset(filename=path_or_buffer, mode='w', format='NETCDF4') as fl:
+                    self._attach_ncgroups(fl)
+
         else:
             self._attach_ncgroups(path_or_buffer)
