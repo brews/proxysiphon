@@ -29,17 +29,6 @@ class RedateMixin:
 
         Parameters
         ----------
-        cut_shallow :
-            Passed to self.slice_datadepths
-        cut_deep :
-            Passed to self.slice_datadepths
-        d_r : sequence
-            delta R values to use instead of those in self. Existing 'delta_R'
-            values are moved to 'delta_R_original' column, if they exist.
-        d_std : sequence
-            One standard deviation values for delta_R to use instead of those in
-            in self. Existing 'delta_R_1s_err' values are moved to
-            'delta_R_1s_err_original', if they exist.
         nsims : int
             Number of age-model simulations to retain.
         **kwargs :
@@ -49,26 +38,7 @@ class RedateMixin:
         -------
         Updated copy of self.
         """
-        # TODO(brews): 3 method calls below should be removed? Doesn't fit main job of function?
         rec = self.copy()
-        rec = rec.average_duplicate_datadepths()
-
-        rec = rec.slice_datadepths(shallow=kwargs.pop('cut_shallow', None),
-                                   deep=kwargs.pop('cut_deep', None))
-        rec = rec.update_deltar()
-
-        # Update 'delta_R' and 'delta_R_1s_err' if custom values in config file.
-        if 'd_r' in kwargs.keys():
-            if 'delta_R_original' not in rec.chronology_information.df.columns:
-                rec.chronology_information.df['delta_R_original'] = rec.chronology_information.df['delta_R']
-            rec.chronology_information.df['delta_R'] = kwargs.pop('d_r')
-            rec.chronology_information.df['delta_R'].replace(to_replace='None', value=np.nan, inplace=True)
-        if 'd_std' in kwargs.keys():
-            if 'delta_R_1s_err_original' not in rec.chronology_information.df.columns:
-                rec.chronology_information.df['delta_R_1s_err_original'] = rec.chronology_information.df[
-                    'delta_R_1s_err']
-            rec.chronology_information.df['delta_R_1s_err'] = kwargs.pop('d_std')
-            rec.chronology_information.df['delta_R_1s_err'].replace(to_replace='None', value=np.nan, inplace=True)
 
         agemodel, mcmc_kwargs = rec._fit_agemodel(**kwargs)
         a_median, a_ensemble = rec._date_sampledepths(agemodel, kwargs.pop('nsims', None))
