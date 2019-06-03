@@ -123,6 +123,11 @@ def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, 
 
 
 def date_proxy(admodel, pdata, nsims):
+    try:
+        import snakebacon as sb
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('snakebacon needs to be installed for age models')
+
     pdata = pd.DataFrame(pdata).copy()
     if 'age' in pdata.columns:
         # Rename to avoid error with sb.ProxyRecord
