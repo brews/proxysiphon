@@ -92,7 +92,25 @@ class RedateMixin:
 
     def _date_sampledepths(self, agemodel, nsims=1000):
         """Date self proxy sample depths given a snakebacon.AgeModel
+
+        Parameters
+        ----------
+        agemodel : snakebacon.AgeModel
+            Age model to date from.
+        nsims : scalar or None, optional
+            Number of draws to include in returned ensemble. ``None`` returns
+            1000 draws.
+
+        Returns
+        -------
+        p_median : pandas.DataFrame
+            Median age per depth.
+        p_ensemble :
+            Ensemble of ages per depth.
         """
+        if nsims is None:
+            nsims = 1000
+
         data_df = self.data.df.copy()
         p_median, p_ensemble = date_proxy(agemodel, data_df, nsims)
 
