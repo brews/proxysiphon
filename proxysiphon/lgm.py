@@ -25,8 +25,6 @@ class RedateMixin:
     def redate(self, **kwargs):
         """Redate proxy data with (snake)bacon
 
-        Information is monkeypatched into the record.
-
         Parameters
         ----------
         nsims : int
@@ -36,7 +34,9 @@ class RedateMixin:
 
         Returns
         -------
-        Updated copy of self.
+        Updated copy of self. The ``snakebacon.AgeDepthModel`` used to redate
+        the record is monkeypatched into
+        ``self.chronology_information.bacon_agemodel`` in this returned copy.
         """
         rec = self.copy()
 
