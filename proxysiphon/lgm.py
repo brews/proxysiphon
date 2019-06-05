@@ -706,24 +706,24 @@ class QcPlotMixin:
             deltar_original = np.int(np.round(self.chronology_information.df['delta_R_original'].values[0]))
             if np.isnan(deltar_original):
                 deltar_original = None
-        except (AttributeError, ValueError, IndexError) as e:
+        except (KeyError, ValueError, IndexError) as e:
             deltar_original = None
 
         try:
             deltar_std_original = np.int(np.round(self.chronology_information.df['delta_R_1s_err_original'].values[0]))
             if np.isnan(deltar_std_original):
                 deltar_std_original = None
-        except (AttributeError, ValueError, IndexError) as e:
+        except (KeyError, ValueError, IndexError) as e:
             deltar_std_original = None
 
         try:
             deltar_used = np.int(np.round(self.chronology_information.df['delta_R'].values[0]))
-        except (AttributeError, TypeError):
+        except (KeyError, TypeError):
             deltar_used = None
 
         try:
             deltar_error_used = np.int(np.round(self.chronology_information.df['delta_R_1s_err'].values[0]))
-        except (AttributeError, TypeError):
+        except (KeyError, TypeError):
             deltar_error_used = None
 
         text_template = 'Latitude: {}°\nLongitude: {}°\nElevation: {} m ' \
