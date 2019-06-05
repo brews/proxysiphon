@@ -29,7 +29,7 @@ setup(
                       'erebusfall', 'netCDF4', 'unidecode', 'xarray', 'tables',
                       'shapely'],
     extras_require={
-        'plots': ['matplotlib', 'cartopy'],
+        'plots': ['matplotlib>=3.0.0', 'cartopy'],
         'agemodel': ['snakebacon']
     },
     tests_require=['pytest'],
