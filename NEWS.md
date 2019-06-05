@@ -1,12 +1,12 @@
 # proxysiphon v0.0.1a2
 
 * `cartopy`, and `snakebacon` have been made recommended dependencies.
-* Add `nc2lmrh5`, a function to read output proxy NetCDF files and convert them to LMR-style HDF5 proxy files.
-* Add several methods to `LgmRecord` subclass for age modeling.
-* Add `PetmRecord` and `LgmRecord`, specialized subclasses of `NcdcRecord`. These are created with `read_lgm()` and `read_petm()`.
-* Add `.to_netcdf()` method to `NcdcRecord`.
 * New method `records.Publication.to_citationstr()` to get quick and dirty bibliography strings.
-
+* Add `PetmRecord` and `LgmRecord`, specialized subclasses of `NcdcRecord`. These are created with `read_lgm()` and `read_petm()`.
+* `LgmRecord` instances now have several methods for age modeling with 14C.
+* `LgmRecord` and `PetmRecord` records now have a `.to_netcdf()` method.
+* `proxysiphon.qcreport` submodule has be refactored into `LgmRecord` and `PetmRecord` methods. This should make it easier to do quick plots (e.g. with `.plot_agedepth()`) and output more comprehensive PDF quality-control reports with `.to_qcpdf()`.
+* Add `nc2lmrh5`, a function to read output proxy NetCDF files and convert them to LMR-style HDF5 proxy files.
 
 # proxysiphon v0.0.1a1
 

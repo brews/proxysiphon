@@ -1,4 +1,5 @@
 import logging
+import datetime
 from copy import deepcopy
 import unidecode
 import numpy as np
@@ -472,3 +473,359 @@ class NetcdfMixin:
 
         else:
             self._attach_ncgroups(path_or_buffer)
+
+
+class QcPlotMixin:
+    """Mixins to add QC plot methods LGM proxy records"""
+
+    @staticmethod
+    def _ax_setup(*args, **kwargs):
+        try:
+            import matplotlib.pylab as plt
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
+        return plt.gca(*args, **kwargs)
+
+    def plot_datavariable(self, variable, ax=None):
+        """
+        Plot a variable in the record data as timeseries.
+
+        The plot also compares the variables from a redated age model with
+        the original age model, if the record has been redated.
+
+        Parameters
+        ----------
+        variable : str
+            Name of variable to plot. Must be in ``self.data``.
+        ax : :class:`mpl.axes.Axes` or None, optional
+            Existing axes to plot onto.
+
+        Returns
+        -------
+        ax : :class:`mpl.axes.Axes`
+
+        """
+        if ax is None:
+            ax = self._ax_setup()
+
+        if variable not in self.data.df.columns:
+            raise KeyError('{} not found'.format(variable))
+
+        if hasattr(self.data, 'age_median'):
+            proxy_df = (self.data.df.set_index('depth')
+                        .join(self.data.age_median, lsuffix='__', sort=True))
+
+            new_age = proxy_df.loc[:, ('age_median', variable)].dropna()
+            ax.plot(new_age.loc[:, 'age_median'], new_age.loc[:, variable], '.',
+                    color='C3', label='MCMC median age')
+            ax.plot(new_age.loc[:, 'age_median'], new_age.loc[:, variable],
+                    color='C3', linewidth=0.5, label='_nolegend_')
+            log.debug('Found new agemodel proxy timeseries')
+        else:
+            proxy_df = self.data.df.set_index('depth')
+            log.debug('Assuming no new agemodel proxy timeseries')
+
+        old_age = proxy_df.loc[:, ('age', variable)].dropna()
+        ax.plot(old_age.loc[:, 'age'], old_age.loc[:, variable], 'x',
+                color='C0', label='File age')
+        ax.plot(old_age.loc[:, 'age'], old_age.loc[:, variable],
+                color='C0', linewidth=0.5, label='_nolegend_')
+
+        if 'd18o' in variable.lower():
+            ax.invert_yaxis()
+        ax.set_ylabel(variable)
+        ax.grid()
+
+        return ax
+
+    def plot_sitemap(self, ax=None):
+        """
+        Plot sample site map using cartopy.
+
+        Requires ``cartopy`` to be installed. Uses the site's northmost latitude
+        and easternmost longitude to plot. So, we assume
+        ``self.site_information.northernmost_latitude`` and
+        ``self.site_information.easternmost_longitude`` are populated.
+
+        Parameters
+        ----------
+        ax : :class:`mpl.axes.Axes` or None, optional
+            Existing axes to plot onto.
+
+        Returns
+        -------
+        ax : :class:`mpl.axes.Axes`
+
+        """
+        try:
+            import cartopy.crs as ccrs
+            import cartopy.feature as cfeature
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError('cartopy needs to be installed for mapping')
+
+        latlon = (self.site_information.northernmost_latitude,
+                  self.site_information.easternmost_longitude)
+
+        if ax is None:
+            ax = self._ax_setup(projection=ccrs.Robinson(central_longitude=latlon[1]))
+
+        ax.set_global()
+        ax.add_feature(cfeature.LAND, facecolor='#B0B0B0')
+        ax.outline_patch.set_linewidth(0.5)
+        ax.plot(latlon[1], latlon[0], 'o', color='C0', transform=ccrs.Geodetic())
+
+        return ax
+
+    def plot_sedrate(self, ax=None):
+        """
+        Plot prior and posterior sediment rates for record agemodel.
+
+        Requires ``self.chronology_information.bacon_agemodel` to be populated
+        with a ``snakebacon.AgeDepthModel``-like instance. You can do this with
+        :method:`self.redateredated()`, for example.
+
+        Parameters
+        ----------
+        ax : :class:`mpl.axes.Axes` or None, optional
+            Existing axes to plot onto.
+
+        Returns
+        -------
+        ax : :class:`mpl.axes.Axes`
+
+        """
+        if ax is None:
+            ax = self._ax_setup()
+
+        ax = self.chronology_information.bacon_agemodel.plot_sediment_rate(ax)
+        ax.lines[-1].set_color('C3')
+
+        return ax
+
+    def plot_sedmemory(self, ax=None):
+        """
+        Plot prior and posterior sediment memory for record agemodel.
+
+        Requires ``self.chronology_information.bacon_agemodel` to be populated
+        with a ``snakebacon.AgeDepthModel``-like instance. You can do this with
+        :method:`self.redateredated()`, for example.
+
+        Parameters
+        ----------
+        ax : :class:`mpl.axes.Axes` or None, optional
+            Existing axes to plot onto.
+
+        Returns
+        -------
+        ax : :class:`mpl.axes.Axes`
+
+        """
+        if ax is None:
+            ax = self._ax_setup()
+
+        ax = self.chronology_information.bacon_agemodel.plot_sediment_memory(ax)
+        ax.lines[-1].set_color('C3')
+
+        return ax
+
+    def plot_agedepth(self, maxage=None, prior_dwidth=30, ax=None):
+        """
+        Plot age models in relation to core depth.
+
+        Parameters
+        ----------
+        maxage : float, int, or None, optional
+            Cutoff age for the plot age model.
+        prior_dwidth : int, optional
+            Passed to :method:`snakebacon.AgeDepthModel.plot_prior_dates`.
+        ax : :class:`mpl.axes.Axes` or None, optional
+            Existing axes to plot onto.
+
+        Returns
+        -------
+        ax : :class:`mpl.axes.Axes`
+
+        """
+        if ax is None:
+            ax = self._ax_setup()
+
+        agemodel = self.chronology_information.bacon_agemodel
+        data_df = self.data.df
+        # Hack to copy and crop the age model to a certain age.
+        if maxage is not None:
+            agemodel = deepcopy(agemodel)
+            too_old = ~(agemodel.age_median() > maxage)
+            agemodel._depth = agemodel.depth[too_old]
+            agemodel._age_ensemble = agemodel.age_ensemble[too_old]
+
+            # data_df = self.data.df.copy()
+            # data_df = data_df.loc[data_df['age'] <= maxage, ('depth', 'age')]
+
+        ax = agemodel.plot(ax=ax)
+        ax.collections[-1].set_cmap('Greys')
+
+        for l in ax.lines:
+            l.set_color('C3')
+
+        ax.plot(data_df.loc[:, 'depth'], data_df.loc[:, 'age'], 'C0',
+                label='File age model')
+        ax = agemodel.plot_prior_dates(dwidth=prior_dwidth, ax=ax)
+        ax.collections[-1].set_color('k')
+        ax.collections[-1].set_zorder(10)
+
+        ax.autoscale_view()
+        ax.set_title('Age model')
+
+        return ax
+
+    def plot_deltar(self, ax=None):
+        """
+        Plot a description of the site carbon reservoir information.
+
+        Parameters
+        ----------
+        ax : :class:`mpl.axes.Axes` or None, optional
+            Existing axes to plot onto.
+
+        Returns
+        -------
+        ax : :class:`mpl.axes.Axes`
+
+        """
+        if ax is None:
+            ax = self._ax_setup()
+
+        latlon = (self.site_information.northernmost_latitude,
+                  self.site_information.easternmost_longitude)
+
+        elevation = self.site_information.elevation
+
+        # These checks are not well written.
+        try:
+            deltar_original = np.int(np.round(self.chronology_information.df['delta_R_original'].values[0]))
+            if np.isnan(deltar_original):
+                deltar_original = None
+        except (AttributeError, ValueError, IndexError) as e:
+            deltar_original = None
+
+        try:
+            deltar_std_original = np.int(np.round(self.chronology_information.df['delta_R_1s_err_original'].values[0]))
+            if np.isnan(deltar_std_original):
+                deltar_std_original = None
+        except (AttributeError, ValueError, IndexError) as e:
+            deltar_std_original = None
+
+        try:
+            deltar_used = np.int(np.round(self.chronology_information.df['delta_R'].values[0]))
+        except (AttributeError, TypeError):
+            deltar_used = None
+
+        try:
+            deltar_error_used = np.int(np.round(self.chronology_information.df['delta_R_1s_err'].values[0]))
+        except (AttributeError, TypeError):
+            deltar_error_used = None
+
+        text_template = 'Latitude: {}°\nLongitude: {}°\nElevation: {} m ' \
+                        '\n\nΔR: {}\nΔRσ: {}\nFile ΔR: {}\nFile ΔRσ: {}'
+        text_str = text_template.format(latlon[0], latlon[1], elevation,
+                                        deltar_used, deltar_error_used,
+                                        deltar_original, deltar_std_original)
+
+        ax.text(0.05, 0.9, text_str, verticalalignment='top',
+                horizontalalignment='left', transform=ax.transAxes)
+        ax.set_title('{}\n{}'.format(self.site_information.site_name, datetime.date.today().isoformat()))
+        ax.axis('off')
+
+        return ax
+
+    def to_qcpdf(self, pdfpath, proxy_vars=None):
+        """
+        Write quality-control report PDF.
+
+        Requires :module:`matplotlib` and :module:`cartopy` to be installed.
+
+        Parameters
+        ----------
+        pdfpath : str
+            Path to write PDF to.
+        proxy_vars : iterable or None, optional
+            Name of series to include in time series plot. Attempts to use all
+            available proxies if ``None``.
+        """
+        log.debug('Writing QC report plots')
+
+        try:
+            from matplotlib.backends.backend_pdf import PdfPages
+            import matplotlib.pylab as plt
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError('matplotlib needs to be installed for plots')
+
+        try:
+            import cartopy.crs as ccrs
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError('cartopy needs to be installed for mapping')
+
+        not_proxy = ['age', 'age_median', 'depth', 'age_ensemble']
+
+        if proxy_vars is None:
+            # TODO(brews): This logic might be good candidate for a more general method.
+            proxy_vars = [str(x) for x in self.data.df.columns if str(x).lower() not in not_proxy]
+
+        latlon = (self.site_information.northernmost_latitude,
+                  self.site_information.easternmost_longitude)
+
+        n_vars = len(proxy_vars)
+        n_cols = n_vars + 1
+
+        has_baconagemodel = hasattr(self.chronology_information, 'bacon_agemodel')
+
+        with PdfPages(pdfpath) as pdf:
+            fig = plt.figure(figsize=(6.5, 9))
+
+            ax2 = plt.subplot2grid((n_cols, 2), (0, 1),
+                                   projection=ccrs.Robinson(central_longitude=latlon[1]))
+            ax3 = plt.subplot2grid((n_cols, 2), (0, 0))
+
+            self.plot_sitemap(ax=ax2)
+
+            self.plot_deltar(ax=ax3)
+
+            for i, varstr in enumerate(proxy_vars):
+                this_ax = plt.subplot2grid((n_cols, 1), (1 + i, 0), colspan=2)
+                this_ax = self.plot_datavariable(varstr, ax=this_ax)
+                this_ax.xaxis.label.set_visible(False)
+                this_ax.title.set_visible(False)
+                if i == 0:
+                    this_ax.title.set_visible(True)
+                    this_ax.set_title('Proxy variables')
+
+            this_ax.xaxis.label.set_visible(True)
+            this_ax.set_xlabel('Age (cal yr BP)')
+            fig.tight_layout()
+            pdf.savefig(bbox_inches='tight')
+            plt.close()
+
+            fig = plt.figure(figsize=(6.5, 9))
+            ax1 = plt.subplot2grid((3, 2), (0, 0))
+            ax2 = plt.subplot2grid((3, 2), (0, 1))
+            ax4 = plt.subplot2grid((3, 2), (1, 0), rowspan=2, colspan=2)
+
+            if has_baconagemodel:
+                self.plot_sedrate(ax=ax1)
+                self.plot_sedmemory(ax=ax2)
+                self.plot_agedepth(maxage=50000, ax=ax4)
+
+            fig.tight_layout()
+            pdf.savefig(bbox_inches='tight')
+            plt.close()
+
+            fig = plt.figure(figsize=(6.5, 9))
+            ax1 = plt.subplot(1, 1, 1)
+            if has_baconagemodel:
+                self.plot_agedepth(maxage=25000, ax=ax1)
+            fig.tight_layout()
+            pdf.savefig(bbox_inches='tight')
+            plt.close()
+
+            log.debug('QC report plot saved to {}'.format(pdfpath))

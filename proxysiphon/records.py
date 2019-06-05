@@ -173,7 +173,7 @@ class NcdcRecord:
     variables: dict = field(default_factory=dict)
 
 
-class LgmRecord(lgm.RedateMixin, lgm.NetcdfMixin, NcdcRecord):
+class LgmRecord(lgm.QcPlotMixin, lgm.RedateMixin, lgm.NetcdfMixin, NcdcRecord):
     """Proxy site LGM NCDC record"""
     pass
 
