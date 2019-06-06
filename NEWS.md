@@ -1,3 +1,8 @@
+# proxysiphon v0.0.1a3
+
+*
+
+
 # proxysiphon v0.0.1a2
 
 * `cartopy`, and `snakebacon` have been made recommended dependencies.
@@ -7,6 +12,7 @@
 * `LgmRecord` and `PetmRecord` records now have a `.to_netcdf()` method.
 * `proxysiphon.qcreport` submodule has be refactored into `LgmRecord` and `PetmRecord` methods. This should make it easier to do quick plots (e.g. with `.plot_agedepth()`) and output more comprehensive PDF quality-control reports with `.to_qcpdf()`.
 * Add `nc2lmrh5`, a function to read output proxy NetCDF files and convert them to LMR-style HDF5 proxy files.
+
 
 # proxysiphon v0.0.1a1
 
