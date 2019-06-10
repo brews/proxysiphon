@@ -662,19 +662,24 @@ class QcPlotMixin:
             # data_df = self.data.df.copy()
             # data_df = data_df.loc[data_df['age'] <= maxage, ('depth', 'age')]
 
-        ax = agemodel.plot(ax=ax)
-        ax.collections[-1].set_cmap('Greys')
+        if len(agemodel._depth) > 0:
+            # Skip age model plotting if maxage cut-out all samples.
+            ax = agemodel.plot(ax=ax)
+            ax.collections[-1].set_cmap('Greys')
 
-        for l in ax.lines:
-            l.set_color('C3')
+            for l in ax.lines:
+                l.set_color('C3')
 
-        ax.plot(data_df.loc[:, 'depth'], data_df.loc[:, 'age'], 'C0',
-                label='File age model')
-        ax = agemodel.plot_prior_dates(dwidth=prior_dwidth, ax=ax)
-        ax.collections[-1].set_color('k')
-        ax.collections[-1].set_zorder(10)
+            ax.plot(data_df.loc[:, 'depth'], data_df.loc[:, 'age'], 'C0',
+                    label='File age model')
+            ax = agemodel.plot_prior_dates(dwidth=prior_dwidth, ax=ax)
+            ax.collections[-1].set_color('k')
+            ax.collections[-1].set_zorder(10)
 
-        ax.autoscale_view()
+            ax.autoscale_view()
+        else:
+            log.warning('No data age-depth data to plot')
+
         ax.set_title('Age model')
 
         return ax

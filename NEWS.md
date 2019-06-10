@@ -1,6 +1,6 @@
 # proxysiphon v0.0.1a3
 
-*
+* `QcPlotMixin.plot_agedepth()` now returns near empty axis if the proxy record has no data to plot.
 
 
 # proxysiphon v0.0.1a2
