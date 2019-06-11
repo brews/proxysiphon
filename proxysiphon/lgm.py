@@ -19,6 +19,50 @@ def _normalize_to_ascii_array(a, dtype='S50'):
 class RedateMixin:
     """Mixins to redate LGM proxy records"""
 
+    def swapin_custom_deltar(self, d_r=None, d_std=None):
+        """Swap-in custom proxy ΔR mean and standard-deviation values.
+
+        ``d_r`` is put into self.chronology_information.df column "delta_R" and
+        ``d_std`` is put into column "delta_R_1s_err". Any existing values in
+        these columns are first moved to a new column "*_original", but only if
+        the "*_original" columns don't already exist. If "*_original" columns
+        already exist, then current values in "delta_R" or "delta_R_1s_err" are
+        discarded in the returned proxy record.
+
+        Parameters
+        ----------
+        d_r : ndarray, scalar or None
+            Carbon reservoir (ΔR) mean value to swap-in. Ignored if None.
+        d_std : ndarray, scalar or None
+            ΔR standard-deviation value to swap-in. Ignored
+            if None.
+
+        Returns
+        -------
+        out : Modified copy of proxy record.
+        """
+        out = self.copy()
+
+        if d_r is None and d_std is None:
+            return out
+
+        # If we're plugging in a new value, we preserve the original but moving it to a new *_original
+        # columns.
+        if d_r is not None:
+            if 'delta_R_original' not in out.chronology_information.df.columns:
+                out.chronology_information.df['delta_R_original'] = out.chronology_information.df['delta_R']
+            out.chronology_information.df['delta_R'] = d_r
+            out.chronology_information.df['delta_R'].replace(to_replace='None', value=np.nan, inplace=True)
+
+        if d_std is not None:
+            if 'delta_R_1s_err_original' not in out.chronology_information.df.columns:
+                out.chronology_information.df['delta_R_1s_err_original'] = out.chronology_information.df[
+                    'delta_R_1s_err']
+            out.chronology_information.df['delta_R_1s_err'] = d_std
+            out.chronology_information.df['delta_R_1s_err'].replace(to_replace='None', value=np.nan, inplace=True)
+
+        return out
+
     def copy(self):
         """Return deep copy of self"""
         return deepcopy(self)

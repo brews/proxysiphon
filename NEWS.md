@@ -1,5 +1,6 @@
 # proxysiphon v0.0.1a3
 
+* Add method `RedateMixin.swapin_custom_deltar()` to handle swapping-in new carbon reservoir values into proxy record chronology information.
 * `QcPlotMixin.plot_agedepth()` now returns near empty axis if the proxy record has no data to plot.
 
 
