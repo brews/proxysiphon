@@ -673,7 +673,7 @@ class QcPlotMixin:
 
         return ax
 
-    def plot_agedepth(self, maxage=None, prior_dwidth=30, ax=None):
+    def plot_agedepth(self, maxage=None, depthlines=None, prior_dwidth=30, ax=None):
         """
         Plot age models in relation to core depth.
 
@@ -681,6 +681,8 @@ class QcPlotMixin:
         ----------
         maxage : float, int, or None, optional
             Cutoff age for the plot age model.
+        depthlines : iterable or None, optional
+            Depths to plot a vertical indicator line.
         prior_dwidth : int, optional
             Passed to :method:`snakebacon.AgeDepthModel.plot_prior_dates`.
         ax : :class:`mpl.axes.Axes` or None, optional
@@ -723,6 +725,12 @@ class QcPlotMixin:
             ax.autoscale_view()
         else:
             log.warning('No data age-depth data to plot')
+
+        try:
+            for d in depthlines:
+                ax.axvline(x=d, color='C4', linestyle='-.', zorder=1.5)
+        except TypeError: # if depthlines is None
+            pass
 
         ax.set_title('Age model')
 
@@ -788,7 +796,7 @@ class QcPlotMixin:
 
         return ax
 
-    def to_qcpdf(self, pdfpath, proxy_vars=None):
+    def to_qcpdf(self, pdfpath, proxy_vars=None, plot_agedepth_kws=None):
         """
         Write quality-control report PDF.
 
@@ -801,6 +809,9 @@ class QcPlotMixin:
         proxy_vars : iterable or None, optional
             Name of series to include in time series plot. Attempts to use all
             available proxies if ``None``.
+        plot_agedepth_kws : dict or None, optional
+            Key-word arguments to pass to both call to ``self.plot_agedepth``
+            when plotting.
         """
         log.debug('Writing QC report plots')
 
@@ -815,8 +826,11 @@ class QcPlotMixin:
         except ModuleNotFoundError:
             raise ModuleNotFoundError('cartopy needs to be installed for mapping')
 
-        not_proxy = ['age', 'age_median', 'depth', 'age_ensemble']
+        if plot_agedepth_kws is None:
+            plot_agedepth_kws = {}
 
+        # Find "non-dimension" data variables to plot, if none were passed.
+        not_proxy = ['age', 'age_median', 'depth', 'age_ensemble']
         if proxy_vars is None:
             # TODO(brews): This logic might be good candidate for a more general method.
             proxy_vars = [str(x) for x in self.data.df.columns if str(x).lower() not in not_proxy]
@@ -863,7 +877,7 @@ class QcPlotMixin:
             if has_baconagemodel:
                 self.plot_sedrate(ax=ax1)
                 self.plot_sedmemory(ax=ax2)
-                self.plot_agedepth(maxage=50000, ax=ax4)
+                self.plot_agedepth(maxage=50000, ax=ax4, **plot_agedepth_kws)
 
             fig.tight_layout()
             pdf.savefig(bbox_inches='tight')
@@ -872,7 +886,7 @@ class QcPlotMixin:
             fig = plt.figure(figsize=(6.5, 9))
             ax1 = plt.subplot(1, 1, 1)
             if has_baconagemodel:
-                self.plot_agedepth(maxage=25000, ax=ax1)
+                self.plot_agedepth(maxage=25000, ax=ax1, **plot_agedepth_kws)
             fig.tight_layout()
             pdf.savefig(bbox_inches='tight')
             plt.close()

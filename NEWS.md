@@ -2,7 +2,8 @@
 
 * Add method `RedateMixin.swapin_custom_deltar()` to handle swapping-in new carbon reservoir values into proxy record chronology information.
 * `QcPlotMixin.plot_agedepth()` now returns near empty axis if the proxy record has no data to plot.
-
+* Add 'plot_agedepth_kws' arguement to `to_qcpdf()`.
+* `plot_agedepth` now accepts passing an optional iterable of depths to 'depthlines'. It then plots vertical lines at those depths. This is used to indicate cut-off points for a proxy record.
 
 # proxysiphon v0.0.1a2
 
