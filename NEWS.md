@@ -1,6 +1,6 @@
 # proxysiphon v0.0.1a4
 
-*
+* Add `LgmRecord.chronology_depth_range()` to get the depth range of chronology determinants (Issue #11).
 
 
 # proxysiphon v0.0.1a3

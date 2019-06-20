@@ -222,6 +222,36 @@ class RedateMixin:
             result = True
         return result
 
+    def chronology_depth_range(self, chronology='original'):
+        """Get (min, max) range of chronology determinant depths
+
+        Parameters
+        ----------
+        chronology : str, optional
+            Which chronology information do we get depth ranges from. Can be
+            'original' or 'redate'. 'original' uses the depths in chronology information from
+            self.chronology_information.df. 'redate' looks to
+            self.chronology_information.bacon_agemodel.mcmcsetup.coredates.depth,
+            assuming that the record has been redated with self.readate().
+
+        Returns
+        -------
+        out : tuple
+            Depths range (min, max).
+
+        See Also
+        --------
+        `LgmRecord.slice_datadepths`
+        """
+        assert chronology in ['original', 'redate']
+        if chronology == 'redate':
+            depths = np.array(self.chronology_information.bacon_agemodel.mcmcsetup.coredates.depth)
+        elif chronology == 'original':
+            depths = np.concatenate([self.chronology_information.df['depth_top'],
+                                     self.chronology_information.df['depth_bottom']])
+        out = (np.nanmin(depths), np.nanmax(depths))
+        return out
+
     def slice_datadepths(self, shallow=None, deep=None):
         """Cut self.data.df to given depths, return updated copy of self
 
@@ -229,6 +259,10 @@ class RedateMixin:
         `deep` must be positive. If no values are given for `shallow` and `deep`,
         the cuts are at the deepest and shallowest samples in
         `self.chronology_information`.
+
+        See Also
+        --------
+        `LgmRecord.chronology_depth_range`
         """
         if len(self.data.df) < 1 or 'depth' not in self.data.df.columns:
             return self
@@ -729,7 +763,7 @@ class QcPlotMixin:
         try:
             for d in depthlines:
                 ax.axvline(x=d, color='C4', linestyle='-.', zorder=1.5)
-        except TypeError: # if depthlines is None
+        except TypeError:  # if depthlines is None
             pass
 
         ax.set_title('Age model')
