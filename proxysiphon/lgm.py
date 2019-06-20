@@ -241,7 +241,7 @@ class RedateMixin:
 
         See Also
         --------
-        `LgmRecord.slice_datadepths`
+        LgmRecord.slice_datadepths : Cut self.data.df to given depths
         """
         assert chronology in ['original', 'redate']
         if chronology == 'redate':
@@ -262,7 +262,7 @@ class RedateMixin:
 
         See Also
         --------
-        `LgmRecord.chronology_depth_range`
+        LgmRecord.chronology_depth_range : Get range of chronology determinant depths
         """
         if len(self.data.df) < 1 or 'depth' not in self.data.df.columns:
             return self
