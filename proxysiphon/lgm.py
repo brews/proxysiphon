@@ -1,11 +1,12 @@
-import logging
 import datetime
+import logging
 from copy import deepcopy
-import unidecode
-import numpy as np
-import netCDF4
-from proxysiphon.agemodel import get_deltar_online, fit_agedepthmodel, date_proxy
 
+import netCDF4
+import numpy as np
+import unidecode
+
+from proxysiphon.agemodel import get_deltar_online, fit_agedepthmodel, date_proxy
 
 log = logging.getLogger(__name__)
 
@@ -253,12 +254,15 @@ class RedateMixin:
         return out
 
     def slice_datadepths(self, shallow=None, deep=None):
-        """Cut self.data.df to given depths, return updated copy of self
+        """Cut self.data to given depths, return updated copy of self
 
         The cut is inclusive for `shallow` and `deep` limits. Both `shallow` and
         `deep` must be positive. If no values are given for `shallow` and `deep`,
         the cuts are at the deepest and shallowest samples in
         `self.chronology_information`.
+
+        Note also that it cuts self.data.df, in addition to self.data.age_median
+        and self.data.age_ensemble, if available.
 
         See Also
         --------
@@ -277,6 +281,13 @@ class RedateMixin:
         assert shallow >= 0 and deep >= 0, 'cut depths must be positive'
 
         out.data.df = out.data.df[(out.data.df['depth'] >= shallow) & (out.data.df['depth'] <= deep)]
+
+        if hasattr(out.data, 'age_ensemble'):
+            out.data.age_ensemble = out.data.age_ensemble[
+                (out.data.age_ensemble.index >= shallow) & (out.data.age_ensemble.index <= deep)]
+        if hasattr(out.data, 'age_median'):
+            out.data.age_median = out.data.age_median[
+                (out.data.age_median.index >= shallow) & (out.data.age_median.index <= deep)]
 
         return out
 
