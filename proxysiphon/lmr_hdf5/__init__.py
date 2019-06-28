@@ -413,7 +413,7 @@ def lmr_da_dfs(sitegrp=None, agemodel_iter=None, find_modern_seasonality=True):
             cut_deep = float(sitegrp['chronology'].cut_deep)
         cut_shallow = -np.inf
         if hasattr(sitegrp['chronology'], 'cut_shallow'):
-            cut_deep = float(sitegrp['chronology'].cut_shallow)
+            cut_shallow = float(sitegrp['chronology'].cut_shallow)
         depth = sitegrp['data'].variables['depth'][:]
         cutoff_msk = (depth >= cut_shallow) & (depth <= cut_deep)
 
