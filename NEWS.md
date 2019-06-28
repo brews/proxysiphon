@@ -2,6 +2,7 @@
 
 * Add `LgmRecord.chronology_depth_range()` to get the depth range of chronology determinants (Issue #11).
 * `LgmRecord.slice_datadepths()` now slices `data.age_ensemble` and `data.age_median` in addition to the general dataframe.
+* `LgmRecord.to_netcdf()` will now add attributes to the chronology section of the output netCDF file if the LgmRecord object `chronology_information` has `cut_shallow` or `cut_deep` attributes.
 
 # proxysiphon v0.0.1a3
 

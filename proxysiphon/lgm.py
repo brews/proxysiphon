@@ -456,6 +456,14 @@ class NetcdfMixin:
         other_type.missing_value = 'NA'
         other_type._Encoding = 'ascii'
         other_type[:] = _normalize_to_ascii_array(self.chronology_information.df['other_type'].fillna('NA'))
+
+        # Add depth cutoff value attributes to chronology group if
+        # self.chronology_information has `cut_shallow` and `cut_deep` attributes.
+        if hasattr(self.chronology_information, 'cut_shallow'):
+            chron.cut_shallow = self.chronology_information.cut_shallow
+        if hasattr(self.chronology_information, 'cut_deep'):
+            chron.cut_deep = self.chronology_information.cut_deep
+
         return chron
 
     def _attach_data_ncgroup(self, parent):
