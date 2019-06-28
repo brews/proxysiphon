@@ -1,6 +1,6 @@
 # proxysiphon v0.0.1a5
 
-*
+* `nc2lmrh5()` and `nc2lmrdf()` should now trim based on depth cutoffs of `LgmRecord` objects. These are optional floats at `self.chronology_information.cut_shallow` and `self.chronology_information.cut_deep`.
 
 # proxysiphon v0.0.1a4
 

@@ -1,6 +1,10 @@
 """Read proxies netCDF5 file and write proxies HDF5 file for LMR Data Assimilation workflow
 """
 
+
+__all__ = ['nc2lmrh5', 'nc2lmrdf']
+
+
 import os
 import logging
 import numpy as np
@@ -403,9 +407,19 @@ def lmr_da_dfs(sitegrp=None, agemodel_iter=None, find_modern_seasonality=True):
             idx = int(agemodel_iter)
             age_yrs_ce = 1950 - sitegrp['data'].variables['age_ensemble'][:, idx]
 
-        is_nan = np.isnan(v[:].filled(np.nan))
-        youngest_ce = np.max(age_yrs_ce[~is_nan])
-        oldest_ce = np.min(age_yrs_ce[~is_nan])
+        # Make depth cutoff mask from depth cutoffs, if available.
+        cut_deep = np.inf
+        if hasattr(sitegrp['chronology'], 'cut_deep'):
+            cut_deep = float(sitegrp['chronology'].cut_deep)
+        cut_shallow = -np.inf
+        if hasattr(sitegrp['chronology'], 'cut_shallow'):
+            cut_deep = float(sitegrp['chronology'].cut_shallow)
+        depth = sitegrp['data'].variables['depth'][:]
+        cutoff_msk = (depth >= cut_shallow) & (depth <= cut_deep)
+
+        notnan_and_notcut = ~np.isnan(v[:].filled(np.nan)) & cutoff_msk
+        youngest_ce = np.max(age_yrs_ce[notnan_and_notcut])
+        oldest_ce = np.min(age_yrs_ce[notnan_and_notcut])
 
         # Put together proxy ID and proxy measurement strings.
         siteid = str(sitegrp.site_name).strip().lower()
@@ -433,7 +447,7 @@ def lmr_da_dfs(sitegrp=None, agemodel_iter=None, find_modern_seasonality=True):
         this_meta['Lon (E)'] = longitude
         this_meta['Archive type'] = ['Marine sediments']
         this_meta['Proxy measurement'] = [pmeasurement]
-        this_meta['Resolution (yr)'] = [(youngest_ce - oldest_ce) / len(age_yrs_ce[~is_nan])]
+        this_meta['Resolution (yr)'] = [(youngest_ce - oldest_ce) / len(age_yrs_ce[notnan_and_notcut])]
         this_meta['Reference'] = [str(None)]
         this_meta['Databases'] = ['[DTDA]']
         if find_modern_seasonality:
@@ -445,7 +459,8 @@ def lmr_da_dfs(sitegrp=None, agemodel_iter=None, find_modern_seasonality=True):
         this_meta['Youngest (C.E.)'] = youngest_ce
         meta_df = meta_df.append(this_meta, ignore_index=True)
 
-        d = (pd.DataFrame({'Year C.E.': age_yrs_ce, proxyid: v[:].filled(np.nan)})
+        d = (pd.DataFrame({'Year C.E.': age_yrs_ce[cutoff_msk],
+                           proxyid: v[:].filled(np.nan)[cutoff_msk]})
                .set_index('Year C.E.')
                .dropna(how='any'))
         data_df = data_df.join(d, how='outer')
