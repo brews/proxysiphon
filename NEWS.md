@@ -1,6 +1,12 @@
+# proxysiphon v0.0.1a6
+
+*
+
+
 # proxysiphon v0.0.1a5
 
 * `nc2lmrh5()` and `nc2lmrdf()` should now trim based on depth cutoffs of `LgmRecord` objects. These are optional floats at `self.chronology_information.cut_shallow` and `self.chronology_information.cut_deep`.
+
 
 # proxysiphon v0.0.1a4
 
@@ -8,6 +14,7 @@
 * `LgmRecord.slice_datadepths()` now slices `data.age_ensemble` and `data.age_median` in addition to the general dataframe.
 * `LgmRecord.to_netcdf()` will now add attributes to the chronology section of the output netCDF file if the LgmRecord object `chronology_information` has `cut_shallow` or `cut_deep` attributes.
 * `LgmRecord.plot_agedepth()` now automatically plots `self.chronology_information.cut_shallow` and `self.chronology_information.cut_deep` attributes as vertical lines, if the cutoff attributes are available.
+
 
 # proxysiphon v0.0.1a3
 
