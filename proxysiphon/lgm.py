@@ -726,7 +726,7 @@ class QcPlotMixin:
 
         return ax
 
-    def plot_agedepth(self, maxage=None, depthlines=None, prior_dwidth=30, ax=None):
+    def plot_agedepth(self, maxage=None, prior_dwidth=30, ax=None):
         """
         Plot age models in relation to core depth.
 
@@ -734,8 +734,6 @@ class QcPlotMixin:
         ----------
         maxage : float, int, or None, optional
             Cutoff age for the plot age model.
-        depthlines : iterable or None, optional
-            Depths to plot a vertical indicator line.
         prior_dwidth : int, optional
             Passed to :method:`snakebacon.AgeDepthModel.plot_prior_dates`.
         ax : :class:`mpl.axes.Axes` or None, optional
@@ -779,11 +777,13 @@ class QcPlotMixin:
         else:
             log.warning('No data age-depth data to plot')
 
-        try:
-            for d in depthlines:
-                ax.axvline(x=d, color='C4', linestyle='-.', zorder=1.5)
-        except TypeError:  # if depthlines is None
-            pass
+        # Cut cut-off information, if available.
+        if hasattr(self.chronology_information, 'cut_shallow'):
+            ax.axvline(x=float(self.chronology_information.cut_shallow), color='C4',
+                       linestyle='-.', zorder=1.5)
+        if hasattr(self.chronology_information, 'cut_deep'):
+            ax.axvline(x=float(self.chronology_information.cut_deep), color='C4',
+                       linestyle='-.', zorder=1.5)
 
         ax.set_title('Age model')
 
