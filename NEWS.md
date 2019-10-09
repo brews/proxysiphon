@@ -1,6 +1,6 @@
 # proxysiphon v0.0.1a6
 
-*
+* Fix bad C14 dates and errors in chronology section of output proxy netCDF files (Issue #12).
 
 
 # proxysiphon v0.0.1a5
