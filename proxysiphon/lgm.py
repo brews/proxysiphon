@@ -413,9 +413,9 @@ class NetcdfMixin:
 
         c14_1s_err = chron.createVariable('c14_1s_err', 'f4', ('depth_top',))
         c14_1s_err.long_name = '14C 1-sigma error'
-        c14_date.units = 'RC yr BP'
+        c14_1s_err.units = 'RC yr BP'
         c14_1s_err.missing_value = np.nan
-        c14_date[:] = self.chronology_information.df['14C_1s_err'].values
+        c14_1s_err[:] = self.chronology_information.df['14C_1s_err'].values
 
         delta_r = chron.createVariable('delta_r', 'f4', ('depth_top',))
         delta_r.long_name = 'delta R'
