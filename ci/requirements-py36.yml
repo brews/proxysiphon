@@ -1,0 +1,24 @@
+name: test_env
+channels:
+- conda-forge
+- sbmalev
+- defaults
+dependencies:
+- attrs
+- cartopy
+- coverage
+- docutils
+- matplotlib>=2.0
+- numpy
+- pandas
+- chardet
+- carbonferret
+- erebusfall
+- netCDF4
+- pytest
+- python=3.6
+- scipy>=1.0
+- unidecode
+- xarray
+- pytables
+- shapely
