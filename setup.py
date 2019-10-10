@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='proxysiphon',
-    version='0.0.1a5',
+    version='0.0.1b1',
     description='Internal lab tool to parse and clean marine sediment proxy data.',
     license='GPLv3',
 
