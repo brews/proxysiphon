@@ -41,7 +41,7 @@ def read_lgm(filepath_or_buffer, encoding=None):
     -------
     out : NcdcRecord
     """
-    out = read_ncdc(filepath_or_buffer, encoding=None)
+    out = read_ncdc(filepath_or_buffer, encoding=encoding)
     return LgmRecord(**out.__dict__)
 
 
@@ -59,7 +59,7 @@ def read_petm(filepath_or_buffer, encoding=None):
     -------
     out : NcdcRecord
     """
-    out = read_ncdc(filepath_or_buffer, encoding=None)
+    out = read_ncdc(filepath_or_buffer, encoding=encoding)
     return PetmRecord(**out.__dict__)
 
 

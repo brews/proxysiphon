@@ -82,7 +82,8 @@ def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, 
         chron.loc[other_msk, 'error'] = chron.loc[other_msk, 'other_1s_err']
         chron.loc[other_msk, 'cc'] = 0  # Using constant calibration curve for non-14C dates
         # Drop rows with `other_date` but no `other_1s_error`.
-        chron.drop(chron[other_msk & chron['other_date'].notnull() & ~chron['other_1s_err'].notnull()].index, inplace=True)
+        chron.drop(chron[other_msk & chron['other_date'].notnull() & ~chron['other_1s_err'].notnull()].index,
+                   inplace=True)
 
     # Have any NaNs in age, depth or error?
     assert chron.loc[:, ['age', 'depth', 'error']].notnull().all().all()
@@ -94,7 +95,8 @@ def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, 
     sug_acc_mean = sb.suggest_accumulation_rate(coredates)
     # n_segs = np.ceil((d_max - d_min) / 5)  # Num segments in mcmc, ~ 5cm, rounded up.
 
-    guesses = np.random.randn(2) * coredates.error[:2] + coredates.age[:2]  # TODO(brews): Check whether need sqrt error here.
+    # TODO(brews): Check whether need sqrt error here.
+    guesses = np.random.randn(2) * coredates.error[:2] + coredates.age[:2]
     guesses[guesses < minyr] = minyr  # Line #70 of Bacon.R warns that otherwise twalk MCMC will not run.
 
     # if n_segs > 200 or n_segs < 5:
@@ -105,7 +107,7 @@ def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, 
                        cc=chron.cc.values,
                        d_r=chron.delta_R.values,
                        d_std=chron.delta_R_1s_err.values,
-                       t_a=[3], t_b=[4], k=50,#n_segs,
+                       t_a=[3], t_b=[4], k=50,  # n_segs,
                        minyr=minyr, maxyr=50000,
                        th01=guesses[0], th02=guesses[1],
                        acc_mean=sug_acc_mean, acc_shape=1.5,
@@ -119,7 +121,6 @@ def fit_agedepthmodel(chron, pdata, deltar=None, deltar_error=None, minyr=None, 
     agemodel = sb.AgeDepthModel(coredates, mcmc_kws=mcmc_params)
     log.debug('Age model fit done')
     return agemodel, coredates, mcmc_params
-
 
 
 def date_proxy(admodel, pdata, nsims):

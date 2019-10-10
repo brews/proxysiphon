@@ -2,6 +2,7 @@ import logging
 import collections
 import datetime
 from io import BytesIO
+
 import pandas as pd
 from chardet import detect as chdetect
 import proxysiphon.records as records
@@ -11,8 +12,8 @@ DIVIDER = '#------------------------'
 DATALINE_TRIGGER = '# Data lines follow (have no #)'
 HEADINGS = ['Contribution_Date', 'Title', 'Investigators',
             'NOTE: Please cite original publication, online resource and date accessed when using this data.',
-            'Description and Notes', 'Publication', 'Funding_Agency', 
-            'Site Information', 'Data_Collection', 'Species', 
+            'Description and Notes', 'Publication', 'Funding_Agency',
+            'Site Information', 'Data_Collection', 'Species',
             'Chronology_Information', 'Variables', 'Data']
 CHRON_HEADER = '# Labcode\tdepth_top\tdepth_bottom\tmat_dated\t14C_date\t14C_1s_err\tdelta_R\tdelta_R_1s_err\tother_date\tother_1s_err\tother_type\t'
 MISSINGVALUE_LABEL = '# Missing Value: '
@@ -37,6 +38,7 @@ def grab_latlon(g):
             fields[k] = v
     return fields['Northernmost_Latitude'], fields['Westernmost_Longitude']
 
+
 def grab_elevation(g):
     """Grab site elevation from proxychimp.Guts"""
     victim = g.pull_section('Site Information')[0]
@@ -46,6 +48,7 @@ def grab_elevation(g):
             ln_split = ln.split(':')
             elevation = float(ln_split[-1])
     return elevation
+
 
 def grab_collection_year(g):
     """Get collection year from Data_Collection section of proxychimp.Guts"""
@@ -57,6 +60,7 @@ def grab_collection_year(g):
             yr = int(ln_split[-1])
     return yr
 
+
 def grab_publication_year(g):
     """Get publication year from proxychimp.Guts"""
     victim = g.pull_section('Publication')
@@ -67,6 +71,7 @@ def grab_publication_year(g):
                 ln_split = ln.split(':')
                 yr.append(int(ln_split[-1]))
     return yr
+
 
 def grab_contribution_date(g):
     """Get contribution date from proxychimp.Guts"""
@@ -340,7 +345,7 @@ class Guts:
                        ('core_length', 'Core_Length:', str),
                        ('notes', 'Notes:', str),
                        ('collection_year', 'Collection_Year:', int)]
-        out = {k[0]:None for k in target_keys}
+        out = {k[0]: None for k in target_keys}
 
         sections = self.pull_section(target_section)
         assert len(sections) < 2, 'More than one section found'
@@ -400,7 +405,7 @@ class Guts:
                        ('online_resource', '# Online_Resource:', str),
                        ('full_citation', '# Full_Citation:', str),
                        ('abstract', '# Abstract:', str)]
-        dict_template = {k[0]:None for k in target_keys}
+        dict_template = {k[0]: None for k in target_keys}
 
         out = []
         sections = self.pull_section(target_section)
@@ -465,7 +470,7 @@ class Guts:
                        ('easternmost_longitude', '# Easternmost_Longitude:', float),
                        ('westernmost_longitude', '# Westernmost_Longitude:', float),
                        ('elevation', '# Elevation:', float)]
-        out = {k[0]:None for k in target_keys}
+        out = {k[0]: None for k in target_keys}
 
         sections = self.pull_section(target_section)
         assert len(sections) < 2, 'More than one section found'
@@ -486,10 +491,10 @@ class Guts:
         pubs = [records.Publication(**p) for p in self.yank_publication()]
         site_info = records.SiteInformation(**self.yank_site_information())
 
-        vars = {}
+        varis = {}
         file_vars = self.yank_variables()
-        for k,v in file_vars.items():
-            vars[k] = records.VariableInfo(*v)
+        for k, v in file_vars.items():
+            varis[k] = records.VariableInfo(*v)
 
         out = records.NcdcRecord(chronology_information=chron,
                                  data=d,
@@ -498,5 +503,5 @@ class Guts:
                                  original_source_url=orig_url,
                                  publication=pubs,
                                  site_information=site_info,
-                                 variables=vars)
+                                 variables=varis)
         return out

@@ -75,7 +75,7 @@ class RedateMixin:
         ----------
         nsims : int
             Number of age-model simulations to retain.
-        **kwargs :
+        kwargs :
             Passed on to ``self._fit_agemodel``.
 
         Returns
