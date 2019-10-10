@@ -11,7 +11,7 @@ setup(
     author_email='malevich@email.arizona.edu',
     url='https://github.com/brews/proxysiphon',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
