@@ -1,39 +1,41 @@
 language: python
-dist: xenial
+dist: bionic
 notifications:
   email: false
-
 matrix:
   fast_finish: true
   include:
-    - python: 3.7
-      env:
-        - CONDA_ENV=py37
-        - JOB_OS=Linux
-    - os: osx
-      language: generic
-      env:
-        - CONDA_ENV=py37
-        - JOB_OS=MacOSX
-
+  - python: 3.7
+    env:
+    - CONDA_ENV=py37
+    - JOB_OS=Linux
+  - os: osx
+    language: generic
+    env:
+    - CONDA_ENV=py37
+    - JOB_OS=MacOSX
 before_install:
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-$JOB_OS-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-$JOB_OS-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-
+- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then wget https://repo.continuum.io/miniconda/Miniconda2-latest-$JOB_OS-x86_64.sh
+  -O miniconda.sh; else wget https://repo.continuum.io/miniconda/Miniconda3-latest-$JOB_OS-x86_64.sh
+  -O miniconda.sh; fi
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda update -q conda
+- conda info -a
 install:
-  - conda env create -q -f ci/requirements-$CONDA_ENV.yml
-  - source activate test_env
-  - pip install .
-
+- conda env create -q -f ci/requirements-$CONDA_ENV.yml
+- source activate test_env
+- pip install .
 script:
-  - pytest --pyargs proxysiphon
+- pytest --pyargs proxysiphon
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+  user: __token__
+  password:
+    secure: YK2vXCGESyFNvLS7CzcXyEP+JYQbhz73nvb2kewg/4DKdTedYIqm381SM3CfCQpOWchtY4CTz32eVS12eqyNvovVvisVo6oD4UA9I52iEC2Kq6Ux7Bb+ahKeu1qYk1AlKYKZAIWB4QOvCGs82nS1rlsGL4J1EXGtvoYKIb3ahTjy2zIVV1rSbbdZqWMAMCRzmr1dNqf4U8ohgkD7cSVCjGKsFZ8msLCgiOd7WU0JUvkjzh0t0X02FL/R7wi0Uq7DZId1wKJBpwCCNz18bPYxRQr9MGsqMJOuX+F2VnOSWx6ZlY2TMcqbf+Gd7l/RyO9tmwVvaMbqFNUSL9B2cjkGGtd+06rXY6sb6yTNwux6ECE6bg1Nr0p1lTlNK1fxTt+4+Z9JGYxkqt8mYdJ+4S1WvBFhku5RSr7kBfke2GJ8R+Wj06l4oHzWXNxRH/VPnusocFw+9sAC5We1ixbW/MOXtdFOVvTIUvGwwKIDXrhM2J3fGuiu48QwMgb2kxsMimd6hKCBfFyQ6tDYEdc1YpjdvA9Nwh8apKfZFI+NzAaS14zlTDUDZaiJBM99KXZVJyN7lMAH26InViitQzfIb3Ua+eyBnPgcekWSTtgquAoe9W/nFvGsjb/OlVKJ3SuWd5HNW4xIYGPusnhqnJDLVWTf0CFqe0LSt9x5RRY8rdSCV8I=
+  skip_existing: true
